@@ -143,6 +143,10 @@
                 <span class="material-symbols-outlined">home</span>
                 <span class="text-xs font-medium">Dashboard</span>
             </a>
+            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="add-assignments.html">
+                <span class="material-symbols-outlined">add_task</span>
+                <span class="text-xs font-medium">Add</span>
+            </a>
             <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="assignments.html">
                 <span class="material-symbols-outlined">list_alt</span>
                 <span class="text-xs font-medium">Assignments</span>
@@ -175,7 +179,7 @@
         let db = null;
         let currentMonth = new Date();
         let allAssignments = [];
-        let isLocalMode = false;
+        const isLocalMode = !firebaseConfig; // Determine mode immediately
         let isAuthReady = false;
         const LOCAL_STORAGE_KEY = `academicPlanner_assignments_${appId}`;
         const priorityOrder = { 'High': 1, 'Medium': 2, 'Low': 3 };
@@ -200,14 +204,17 @@
         /* --- UTILITY FUNCTIONS --- */
 
         /**
-         * Reads all assignments from local storage.
+         * Reads all assignments from local storage with robust parsing.
          */
         function getAssignmentsFromLocal() {
             try {
                 const data = localStorage.getItem(LOCAL_STORAGE_KEY);
-                return data ? JSON.parse(data) : [];
+                // Return an empty array if no data or parsing fails
+                const assignments = data ? JSON.parse(data) : [];
+                console.log(`Local Mode: Loaded ${assignments.length} assignments.`);
+                return assignments;
             } catch (error) {
-                console.error("Error reading from local storage:", error);
+                console.error("Error reading or parsing local storage:", error);
                 return [];
             }
         }
@@ -226,6 +233,13 @@
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         };
+        
+        // Close modal when clicking outside
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modalCloseButton.click();
+            }
+        };
 
         /* --- CALENDAR RENDERING --- */
 
@@ -238,7 +252,7 @@
                 // Ignore completed assignments
                 if (a.isCompleted) return; 
 
-                const dateKey = a.dueDate; // Assumes YYYY-MM-DD format
+                const dateKey = a.dueDate; // Assumes YYYY-MM-DD format from storage
                 
                 if (!indicators[dateKey]) {
                     indicators[dateKey] = a.priority;
@@ -379,19 +393,21 @@
             if (!isAuthReady) return;
 
             if (isLocalMode) {
-                // --- LOCAL MODE ---
+                // --- LOCAL MODE (Synchronous Data Load) ---
                 connectionStatusEl.textContent = 'Local Mode (Data from browser)';
+                // FIX: Use separate calls instead of chaining classList methods
+                connectionStatusEl.classList.remove('text-slate-500');
                 connectionStatusEl.classList.add('text-orange-600', 'dark:text-orange-400');
                 
+                // Immediately load, process, and render data
                 const assignments = getAssignmentsFromLocal();
                 handleDataUpdate(assignments);
                 
-                // Note: In Local Mode, the data is static until the page is reloaded.
-                // We render once and rely on user refresh for new data.
-
             } else {
-                // --- DATABASE MODE (Firebase) ---
+                // --- DATABASE MODE (Firebase Real-time Listener) ---
                 connectionStatusEl.textContent = 'Database Connected (Real-time)';
+                // FIX: Use separate calls instead of chaining classList methods
+                connectionStatusEl.classList.remove('text-slate-500');
                 connectionStatusEl.classList.add('text-green-600', 'dark:text-green-400');
 
                 const assignmentsColRef = collection(db, `artifacts/${appId}/public/data/assignments`);
@@ -410,11 +426,13 @@
                     handleDataUpdate(assignments);
                 }, (error) => {
                     console.error("Firestore error:", error);
-                    connectionStatusEl.textContent = 'DB Failed (Check console)';
-                    connectionStatusEl.classList.add('text-red-600', 'dark:text-red-400');
+                    connectionStatusEl.textContent = 'DB Failed/Local Mode';
+                    // FIX: Use separate calls instead of chaining classList methods
+                    connectionStatusEl.classList.remove('text-green-600');
+                    connectionStatusEl.classList.add('text-orange-600', 'dark:text-orange-400');
                     // Fallback to local on connection error
-                    isLocalMode = true; 
-                    setupDataListener(); // Try again in local mode
+                    // Note: We don't re-run the listener setup, just handle the fallback UI status
+                    handleDataUpdate(getAssignmentsFromLocal());
                 });
             }
         }
@@ -424,17 +442,16 @@
 
         /**
          * Initializes Firebase or falls back to Local Mode.
+         * Renamed to startApplication for consistency with other files.
          */
-        async function initializeFirebase() {
-            if (!firebaseConfig) {
-                isLocalMode = true;
+        async function startApplication() {
+            if (isLocalMode) {
                 isAuthReady = true;
-                connectionStatusEl.textContent = 'Local Mode (No DB)';
-                connectionStatusEl.classList.add('text-orange-600', 'dark:text-orange-400');
-                setupDataListener();
+                setupDataListener(); // Start listening immediately in local mode
                 return;
             }
 
+            // Attempt to connect to Firebase
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -451,16 +468,14 @@
 
             } catch (error) {
                 console.error("Firebase initialization failed, falling back to Local Mode:", error);
-                isLocalMode = true;
+                // Note: isLocalMode is true, but we still finalize the process
                 isAuthReady = true;
-                connectionStatusEl.textContent = 'DB Failed/Local Mode';
-                connectionStatusEl.classList.add('text-orange-600', 'dark:text-orange-400');
-                setupDataListener();
+                setupDataListener(); // This will execute the isLocalMode branch
             }
         }
         
         // Initialize the app
-        initializeFirebase();
+        startApplication();
 
     </script>
 </body>
