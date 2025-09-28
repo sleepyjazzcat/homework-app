@@ -4,12 +4,13 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>New Assignment</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     <script>
+        // Tailwind Configuration
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -53,89 +54,75 @@
         }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-foreground-light dark:text-foreground-dark">
-    <div class="flex flex-col h-screen">
-        <!-- Header -->
-        <header class="flex items-center p-4 border-b border-input-light dark:border-input-dark shadow-sm">
-            <a href="dashboard.html" class="p-2 text-foreground-light dark:text-foreground-dark">
-                <span class="material-symbols-outlined">close</span>
-            </a>
-            <h1 class="flex-1 text-lg font-bold text-center -ml-10">New Assignment</h1>
-        </header>
+<body class="bg-background-light dark:bg-background-dark font-display text-foreground-light dark:text-foreground-dark flex flex-col min-h-screen">
 
-        <!-- Main Content Area -->
-        <main class="flex-1 p-4 overflow-y-auto">
-            <div id="message-box" class="hidden p-3 rounded-lg text-sm font-medium transition-opacity duration-300 mb-4"></div>
+    <header class="flex items-center p-4 border-b border-input-light dark:border-input-dark bg-card-light dark:bg-card-dark sticky top-0 z-10">
+        <a href="dashboard.html" class="p-2 text-foreground-light dark:text-foreground-dark">
+            <span class="material-symbols-outlined">close</span>
+        </a>
+        <h1 class="flex-1 text-lg font-bold text-center -ml-10">New Assignment</h1>
+    </header>
+
+    <!-- Message Box for Feedback -->
+    <div id="message-box" class="mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 hidden"></div>
+
+    <main class="flex-1 p-4 overflow-y-auto">
+        <form id="assignment-form" class="space-y-6">
+            <div>
+                <label class="sr-only" for="assignment-name">Assignment Name</label>
+                <input class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="assignment-name" placeholder="Assignment Name" type="text" required/>
+            </div>
             
-            <form id="new-assignment-form" class="space-y-6">
-                <!-- Assignment Name (Required) -->
-                <div>
-                    <label class="sr-only" for="assignment-name">Assignment Name</label>
-                    <input class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="assignment-name" placeholder="Assignment Title (Required)" type="text" required/>
+            <div>
+                <label class="sr-only" for="course">Class</label>
+                <div class="relative">
+                    <select class="w-full appearance-none bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 text-foreground-light dark:text-foreground-dark focus:ring-2 focus:ring-primary [&:not([value])]:text-placeholder-light dark:[&:not([value])]:text-placeholder-dark" id="course" required>
+                        <option value="" disabled selected>Class (Required)</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Science">Science</option>
+                        <option value="History">History</option>
+                        <option value="English">English</option>
+                        <option value="Art">Art</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">expand_more</span>
                 </div>
+            </div>
+            
+            <div>
+                <label class="sr-only" for="due-date">Due Date</label>
+                <div class="relative">
+                    <!-- Note: Type is text initially, switches to date on focus -->
+                    <input class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="due-date" onblur="(this.type='text')" onfocus="(this.type='date')" placeholder="Due Date (Required)" type="text" required/>
+                    <span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">calendar_today</span>
+                </div>
+            </div>
 
-                <!-- Class Dropdown (Required) -->
-                <div>
-                    <label class="sr-only" for="course">Class</label>
-                    <div class="relative">
-                        <select class="w-full appearance-none bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 text-foreground-light dark:text-foreground-dark focus:ring-2 focus:ring-primary" id="course" required>
-                            <option value="" disabled selected class="text-placeholder-light dark:text-placeholder-dark">Class (Required)</option>
-                            <option value="Mathematics">Mathematics</option>
-                            <option value="Science">Science</option>
-                            <option value="History">History</option>
-                            <option value="English">English</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">expand_more</span>
-                    </div>
+            <div>
+                <label class="sr-only" for="priority">Priority</label>
+                <div class="relative">
+                    <select class="w-full appearance-none bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 text-foreground-light dark:text-foreground-dark focus:ring-2 focus:ring-primary" id="priority">
+                        <option value="Low" selected>Priority: Low</option>
+                        <option value="Medium">Priority: Medium</option>
+                        <option value="High">Priority: High</option>
+                    </select>
+                    <span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">expand_more</span>
                 </div>
-
-                <!-- Due Date (Required) -->
-                <div>
-                    <label class="sr-only" for="due-date">Due Date</label>
-                    <div class="relative">
-                        <input class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="due-date" onblur="(this.type='text')" onfocus="(this.type='date')" placeholder="Due Date (Required)" type="text" required/>
-                        <span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">calendar_today</span>
-                    </div>
-                </div>
-                
-                <!-- Priority Dropdown -->
-                <div>
-                    <label class="sr-only" for="priority">Priority</label>
-                    <div class="relative">
-                        <select class="w-full appearance-none bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 text-foreground-light dark:text-foreground-dark focus:ring-2 focus:ring-primary" id="priority">
-                            <option value="Low">Low Priority</option>
-                            <option value="Medium" selected>Medium Priority</option>
-                            <option value="High">High Priority</option>
-                        </select>
-                        <span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">expand_more</span>
-                    </div>
-                </div>
-
-                <!-- Description -->
-                <div>
-                    <label class="sr-only" for="description">Description</label>
-                    <textarea class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg p-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="description" placeholder="Description (Optional)" rows="4"></textarea>
-                </div>
-
-                <!-- Reminder Toggle (Optional, non-functional for this scope) -->
-                <div class="flex items-center justify-between bg-card-light dark:bg-card-dark p-4 rounded-lg">
-                    <span class="font-medium">Set Reminder</span>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input class="sr-only peer" type="checkbox" id="reminder-toggle"/>
-                        <div class="w-11 h-6 bg-input-light dark:bg-input-dark rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-gray-300 dark:after:border-gray-600 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                    </label>
-                </div>
-            </form>
-        </main>
-        
-        <!-- Footer (Action Button) -->
-        <footer class="p-4 border-t border-input-light dark:border-input-dark">
-            <button id="create-assignment-button" class="w-full bg-primary text-white font-bold h-12 rounded-lg text-base tracking-wide transition-colors disabled:bg-primary/50 disabled:cursor-not-allowed" disabled>
-                Initializing...
-            </button>
-        </footer>
-    </div>
+            </div>
+            
+            <div>
+                <label class="sr-only" for="description">Description</label>
+                <textarea class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg p-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="description" placeholder="Description (Optional)" rows="4"></textarea>
+            </div>
+            
+        </form>
+    </main>
+    
+    <footer class="p-4 border-t border-input-light dark:border-input-dark bg-card-light dark:bg-card-dark">
+        <button id="create-button" class="w-full bg-primary text-white font-bold h-12 rounded-lg text-base tracking-wide transition-colors disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed" disabled>
+            Initializing...
+        </button>
+    </footer>
 
     <!-- Firebase and Application Logic -->
     <script type="module">
@@ -143,29 +130,21 @@
         import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Set log level for debugging
         setLogLevel('Debug');
 
-        // Global Firebase variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        let db;
-        let auth;
+        let db = null;
         let isAuthReady = false;
+        let isLocalMode = false;
+        const LOCAL_STORAGE_KEY = `academicPlanner_assignments_${appId}`;
 
         // UI elements
-        const form = document.getElementById('new-assignment-form');
-        const createButton = document.getElementById('create-assignment-button');
+        const form = document.getElementById('assignment-form');
+        const createButton = document.getElementById('create-button');
         const messageBox = document.getElementById('message-box');
-
-        // Form fields
-        const titleInput = document.getElementById('assignment-name');
-        const classSelect = document.getElementById('course');
-        const dueDateInput = document.getElementById('due-date');
-        const prioritySelect = document.getElementById('priority');
-        const descriptionTextarea = document.getElementById('description');
 
         /**
          * Utility function to display messages.
@@ -181,12 +160,16 @@
                     bgColor = 'bg-red-100 dark:bg-red-900';
                     textColor = 'text-red-700 dark:text-red-300';
                     break;
-                default:
+                case 'info':
                     bgColor = 'bg-blue-100 dark:bg-blue-900';
                     textColor = 'text-blue-700 dark:text-blue-300';
+                    break;
+                default:
+                    bgColor = 'bg-gray-100 dark:bg-gray-700';
+                    textColor = 'text-gray-800 dark:text-gray-200';
             }
 
-            messageBox.className = `block p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
+            messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
             messageBox.innerHTML = message;
             messageBox.classList.remove('hidden');
 
@@ -197,125 +180,155 @@
                 }, duration);
             }
         }
+        
+        /**
+         * Checks required fields and toggles the button state.
+         */
+        function validateForm() {
+            if (!isAuthReady && !isLocalMode) {
+                createButton.disabled = true;
+                return;
+            }
+
+            const isTitleValid = document.getElementById('assignment-name').value.trim() !== '';
+            const isClassValid = document.getElementById('course').value.trim() !== '';
+            const isDateValid = document.getElementById('due-date').value.trim() !== '';
+
+            createButton.disabled = !(isTitleValid && isClassValid && isDateValid);
+        }
 
         /**
-         * Initializes Firebase and authenticates the user.
+         * Handles saving data to Local Storage.
+         */
+        function saveToLocalStorage(assignmentData) {
+            try {
+                // Get existing assignments or initialize an empty array
+                const existingAssignments = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+                
+                // Add new assignment with a temporary ID
+                const newAssignment = {
+                    ...assignmentData,
+                    id: Date.now().toString(), // Simple unique ID for local storage
+                    createdAt: new Date().toISOString()
+                };
+                
+                existingAssignments.push(newAssignment);
+                
+                // Save back to local storage
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(existingAssignments));
+                
+                return { success: true };
+
+            } catch (error) {
+                console.error("Local Storage save error:", error);
+                return { success: false, error: "Failed to save data locally." };
+            }
+        }
+        
+        /**
+         * Handles the form submission event.
+         */
+        async function handleCreateAssignment(event) {
+            event.preventDefault();
+            createButton.disabled = true;
+            createButton.textContent = 'Saving...';
+
+            if (!isAuthReady && !isLocalMode) {
+                 showMessage("Error: Connection is not ready.", "error");
+                 createButton.textContent = 'Create Assignment';
+                 validateForm();
+                 return;
+            }
+            
+            const assignmentData = {
+                title: document.getElementById('assignment-name').value.trim(),
+                course: document.getElementById('course').value,
+                dueDate: document.getElementById('due-date').value,
+                priority: document.getElementById('priority').value,
+                description: document.getElementById('description').value.trim(),
+                isCompleted: false,
+            };
+
+            let result;
+
+            if (isLocalMode) {
+                // LOCAL STORAGE MODE
+                result = saveToLocalStorage(assignmentData);
+            } else {
+                // FIREBASE MODE
+                try {
+                    const assignmentsCol = collection(db, `artifacts/${appId}/public/data/assignments`);
+                    await addDoc(assignmentsCol, assignmentData);
+                    result = { success: true };
+                } catch (error) {
+                    console.error("Firestore save error:", error);
+                    result = { success: false, error: "Failed to save to database." };
+                }
+            }
+
+            if (result.success) {
+                showMessage("Assignment created successfully!", "success");
+                setTimeout(() => {
+                    // Redirect back to the main assignments list
+                    window.location.href = 'assignments.html';
+                }, 1000);
+            } else {
+                showMessage(`Error creating assignment: ${result.error}`, "error", 5000);
+                createButton.textContent = 'Create Assignment';
+            }
+            validateForm();
+        }
+
+        /**
+         * Initializes Firebase or falls back to Local Mode.
          */
         async function initializeFirebase() {
             if (!firebaseConfig) {
-                console.error("Firebase configuration missing. Cannot connect to database.");
-                createButton.textContent = 'Waiting for Connection...';
-                createButton.disabled = true;
-                return;
-            }
+                isLocalMode = true;
+                console.warn("Firebase configuration missing. Switching to Local Mode.");
+                createButton.textContent = 'Create Assignment (Local Mode)';
+                isAuthReady = true; // Signal readiness for Local Mode
+                showMessage("Database connection missing. Data will be saved only in your browser (Local Mode).", "info", 0);
+            } else {
+                try {
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    const auth = getAuth(app);
+                    
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
 
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // Sign in using provided token or anonymously
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
+                    isAuthReady = true;
+                    console.log("Firebase initialized and ready.");
+                    createButton.textContent = 'Create Assignment';
+                    showMessage("Connected to database. Data is shared and persistent.", "success");
+                    
+                } catch (error) {
+                    // If Firebase initialization fails despite having config (e.g., rules error), fall back to local
+                    console.error("Firebase initialization failed, falling back to Local Mode:", error);
+                    isLocalMode = true;
+                    isAuthReady = true;
+                    createButton.textContent = 'Create Assignment (Local Mode)';
+                    showMessage("Database connection failed. Data will be saved only in your browser (Local Mode).", "info", 0);
                 }
-
-                isAuthReady = true;
-                console.log("Firebase initialized and ready. Using public data collection path.");
-                
-                // Once authenticated, set the button text and check form validity.
-                createButton.textContent = 'Create Assignment';
-                checkFormValidity();
-                
-            } catch (error) {
-                console.error("Firebase initialization or authentication error:", error);
-                showMessage("Database initialization failed. Check console for details.", "error", 0);
-                createButton.textContent = 'Auth Failed';
             }
-        }
-
-        /**
-         * Checks if required fields are filled and toggles button state.
-         * Only runs if the app is ready.
-         */
-        function checkFormValidity() {
-            if (!isAuthReady) {
-                createButton.disabled = true;
-                return;
-            }
-
-            const isTitleFilled = titleInput.value.trim().length > 0;
-            const isClassSelected = classSelect.value.trim().length > 0;
-            const isDueDateSet = dueDateInput.value.trim().length > 0;
-
-            const isValid = isTitleFilled && isClassSelected && isDueDateSet;
             
-            createButton.disabled = !isValid;
-        }
-
-        /**
-         * Handles the form submission and saves data to Firestore.
-         */
-        async function handleCreateAssignment() {
-            if (!isAuthReady) {
-                showMessage("App is not ready. Please wait for initialization.", "error");
-                return;
-            }
-
-            // Re-check validity before saving
-            if (createButton.disabled) {
-                showMessage("Please fill out all required fields.", "error");
-                return;
-            }
-
-            // Disable button during submission to prevent duplicates
-            createButton.disabled = true;
-            const originalText = createButton.textContent;
-            createButton.textContent = 'Saving...';
-
-            const assignmentData = {
-                title: titleInput.value.trim(),
-                course: classSelect.value.trim(), // Stored as 'course' in DB for consistency
-                dueDate: dueDateInput.value.trim(),
-                priority: prioritySelect.value,
-                description: descriptionTextarea.value.trim(),
-                isCompleted: false,
-                createdAt: new Date().toISOString(),
-            };
-
-            // Use the public collection path for shared assignments
-            const assignmentsCol = collection(db, `artifacts/${appId}/public/data/assignments`);
-
-            try {
-                await addDoc(assignmentsCol, assignmentData);
-                showMessage("Assignment created successfully!", "success");
-                
-                // Redirect user back to the assignments list after a short delay
-                setTimeout(() => {
-                    window.location.href = 'assignments.html';
-                }, 1000);
-
-            } catch (error) {
-                console.error("Error creating assignment:", error);
-                showMessage("Failed to create assignment. Please try again.", "error");
-                createButton.disabled = false;
-                createButton.textContent = originalText;
-            }
+            // Add listeners after mode is determined
+            form.addEventListener('input', validateForm);
+            form.addEventListener('submit', handleCreateAssignment);
+            validateForm(); // Initial validation check
         }
         
-        // --- Event Listeners ---
-        
-        // Listen to input changes to manage button state
-        titleInput.addEventListener('input', checkFormValidity);
-        classSelect.addEventListener('change', checkFormValidity);
-        dueDateInput.addEventListener('change', checkFormValidity);
-        
-        // Listen for the button click
-        createButton.addEventListener('click', handleCreateAssignment);
-
-        // Initialize Firebase on load
+        // Initialize the app on load
         initializeFirebase();
+
+        // Handle Dark Mode preference on load
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.documentElement.classList.add('dark');
+        }
     </script>
 </body>
 </html>
