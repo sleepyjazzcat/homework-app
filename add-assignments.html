@@ -4,13 +4,12 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>New Assignment</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     <script>
-        // Tailwind Configuration
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -57,59 +56,57 @@
 <body class="bg-background-light dark:bg-background-dark font-display text-foreground-light dark:text-foreground-dark">
     <div class="flex flex-col h-screen">
         <!-- Header -->
-        <header class="flex items-center p-4 border-b border-input-light dark:border-input-dark">
-            <a class="p-2 text-foreground-light dark:text-foreground-dark rounded-lg hover:bg-input-light dark:hover:bg-input-dark transition-colors" href="dashboard.html" aria-label="Close form">
+        <header class="flex items-center p-4 border-b border-input-light dark:border-input-dark shadow-sm">
+            <a href="dashboard.html" class="p-2 text-foreground-light dark:text-foreground-dark">
                 <span class="material-symbols-outlined">close</span>
             </a>
             <h1 class="flex-1 text-lg font-bold text-center -ml-10">New Assignment</h1>
         </header>
 
-        <!-- Message Box for Feedback -->
-        <div id="message-box" class="hidden mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300"></div>
-
         <!-- Main Content Area -->
         <main class="flex-1 p-4 overflow-y-auto">
-            <form id="assignment-form" class="space-y-6">
-                <!-- Assignment Name -->
+            <div id="message-box" class="hidden p-3 rounded-lg text-sm font-medium transition-opacity duration-300 mb-4"></div>
+            
+            <form id="new-assignment-form" class="space-y-6">
+                <!-- Assignment Name (Required) -->
                 <div>
                     <label class="sr-only" for="assignment-name">Assignment Name</label>
                     <input class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="assignment-name" placeholder="Assignment Title (Required)" type="text" required/>
                 </div>
 
-                <!-- Class -->
+                <!-- Class Dropdown (Required) -->
                 <div>
                     <label class="sr-only" for="course">Class</label>
                     <div class="relative">
                         <select class="w-full appearance-none bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 text-foreground-light dark:text-foreground-dark focus:ring-2 focus:ring-primary" id="course" required>
-                            <option class="text-placeholder-light dark:text-placeholder-dark" value="" disabled="" selected="">Class (Required)</option>
+                            <option value="" disabled selected class="text-placeholder-light dark:text-placeholder-dark">Class (Required)</option>
                             <option value="Mathematics">Mathematics</option>
                             <option value="Science">Science</option>
                             <option value="History">History</option>
-                            <option value="English/Literature">English/Literature</option>
-                            <option value="Computer Science">Computer Science</option>
+                            <option value="English">English</option>
                             <option value="Other">Other</option>
                         </select>
                         <span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">expand_more</span>
                     </div>
                 </div>
 
-                <!-- Due Date -->
+                <!-- Due Date (Required) -->
                 <div>
                     <label class="sr-only" for="due-date">Due Date</label>
                     <div class="relative">
-                        <input class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="due-date" type="date" required/>
+                        <input class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="due-date" onblur="(this.type='text')" onfocus="(this.type='date')" placeholder="Due Date (Required)" type="text" required/>
                         <span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">calendar_today</span>
                     </div>
                 </div>
-
-                <!-- Priority -->
+                
+                <!-- Priority Dropdown -->
                 <div>
                     <label class="sr-only" for="priority">Priority</label>
                     <div class="relative">
-                        <select class="w-full appearance-none bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 text-foreground-light dark:text-foreground-dark focus:ring-2 focus:ring-primary" id="priority" required>
-                            <option value="Medium" selected>Priority: Medium</option>
-                            <option value="High">Priority: High (Urgent)</option>
-                            <option value="Low">Priority: Low</option>
+                        <select class="w-full appearance-none bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 text-foreground-light dark:text-foreground-dark focus:ring-2 focus:ring-primary" id="priority">
+                            <option value="Low">Low Priority</option>
+                            <option value="Medium" selected>Medium Priority</option>
+                            <option value="High">High Priority</option>
                         </select>
                         <span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">expand_more</span>
                     </div>
@@ -120,12 +117,21 @@
                     <label class="sr-only" for="description">Description</label>
                     <textarea class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg p-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="description" placeholder="Description (Optional)" rows="4"></textarea>
                 </div>
+
+                <!-- Reminder Toggle (Optional, non-functional for this scope) -->
+                <div class="flex items-center justify-between bg-card-light dark:bg-card-dark p-4 rounded-lg">
+                    <span class="font-medium">Set Reminder</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input class="sr-only peer" type="checkbox" id="reminder-toggle"/>
+                        <div class="w-11 h-6 bg-input-light dark:bg-input-dark rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-gray-300 dark:after:border-gray-600 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    </label>
+                </div>
             </form>
         </main>
-
-        <!-- Footer Button -->
+        
+        <!-- Footer (Action Button) -->
         <footer class="p-4 border-t border-input-light dark:border-input-dark">
-            <button id="create-assignment-button" class="w-full bg-primary text-white font-bold h-12 rounded-lg text-base tracking-wide hover:bg-blue-600 transition-colors disabled:bg-gray-400">
+            <button id="create-assignment-button" class="w-full bg-primary text-white font-bold h-12 rounded-lg text-base tracking-wide transition-colors disabled:bg-primary/50 disabled:cursor-not-allowed" disabled>
                 Create Assignment
             </button>
         </footer>
@@ -150,16 +156,16 @@
         let isAuthReady = false;
 
         // UI elements
-        const messageBox = document.getElementById('message-box');
-        const form = document.getElementById('assignment-form');
+        const form = document.getElementById('new-assignment-form');
         const createButton = document.getElementById('create-assignment-button');
+        const messageBox = document.getElementById('message-box');
 
-        // Form Inputs
-        const assignmentNameInput = document.getElementById('assignment-name');
-        const classInput = document.getElementById('course'); // Renamed variable to classInput
+        // Form fields
+        const titleInput = document.getElementById('assignment-name');
+        const classSelect = document.getElementById('course');
         const dueDateInput = document.getElementById('due-date');
-        const descriptionInput = document.getElementById('description');
-        const priorityInput = document.getElementById('priority');
+        const prioritySelect = document.getElementById('priority');
+        const descriptionTextarea = document.getElementById('description');
 
         /**
          * Utility function to display messages.
@@ -175,16 +181,12 @@
                     bgColor = 'bg-red-100 dark:bg-red-900';
                     textColor = 'text-red-700 dark:text-red-300';
                     break;
-                case 'info':
+                default:
                     bgColor = 'bg-blue-100 dark:bg-blue-900';
                     textColor = 'text-blue-700 dark:text-blue-300';
-                    break;
-                default:
-                    bgColor = 'bg-gray-100 dark:bg-gray-700';
-                    textColor = 'text-gray-800 dark:text-gray-200';
             }
 
-            messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
+            messageBox.className = `block p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
             messageBox.innerHTML = message;
             messageBox.classList.remove('hidden');
 
@@ -201,8 +203,7 @@
          */
         async function initializeFirebase() {
             if (!firebaseConfig) {
-                showMessage("Database connection failed. Configuration missing.", "error");
-                createButton.disabled = true;
+                showMessage("Database configuration missing.", "error");
                 return;
             }
 
@@ -218,86 +219,85 @@
                 }
 
                 isAuthReady = true;
-                console.log("Firebase initialized.");
+                console.log("Firebase initialized and ready.");
+                // Immediately check validation status after auth, in case a user reloads with data already entered
+                checkFormValidity();
                 
             } catch (error) {
                 console.error("Firebase initialization or authentication error:", error);
-                showMessage("Authentication failed. Cannot save data.", "error");
-                createButton.disabled = true;
+                showMessage("Authentication failed. Cannot save assignment.", "error");
             }
         }
 
         /**
-         * Returns the Firestore collection path for public assignments.
+         * Checks if required fields are filled and toggles button state.
          */
-        function getAssignmentsCollection() {
-            if (!db || !isAuthReady) {
-                return null;
-            }
-            // Public collection path for shared data
-            return collection(db, `artifacts/${appId}/public/data/assignments`);
+        function checkFormValidity() {
+            const isTitleFilled = titleInput.value.trim().length > 0;
+            const isClassSelected = classSelect.value.trim().length > 0;
+            const isDueDateSet = dueDateInput.value.trim().length > 0;
+
+            const isValid = isTitleFilled && isClassSelected && isDueDateSet;
+            
+            createButton.disabled = !isValid;
         }
 
         /**
-         * Handles form submission to create a new assignment document.
+         * Handles the form submission and saves data to Firestore.
          */
         async function handleCreateAssignment() {
             if (!isAuthReady) {
-                showMessage("Database not ready. Please try again.", "error");
-                return;
-            }
-            
-            // Basic Form Validation (HTML required attributes should handle most)
-            if (!form.checkValidity()) {
-                showMessage("Please fill out all required fields.", "error");
-                // Trigger browser validation feedback
-                form.reportValidity();
+                showMessage("App is not ready. Please wait for initialization.", "error");
                 return;
             }
 
+            // Disable button during submission to prevent duplicates
             createButton.disabled = true;
-            createButton.textContent = "Saving...";
+            createButton.textContent = 'Saving...';
 
-            // Create an ISO 8601 string for the due date, marking it as midnight UTC for consistency
-            const rawDate = dueDateInput.value; // YYYY-MM-DD
-            const isoDueDate = new Date(`${rawDate}T00:00:00Z`).toISOString();
+            // Re-check validity before saving
+            if (createButton.disabled) {
+                showMessage("Please fill out all required fields.", "error");
+                return;
+            }
 
-            const newAssignment = {
-                title: assignmentNameInput.value.trim(),
-                course: classInput.value, // Still using 'course' key for database consistency
-                dueDate: isoDueDate,
-                description: descriptionInput.value.trim() || 'No description provided.',
-                priority: priorityInput.value,
+            const assignmentData = {
+                title: titleInput.value.trim(),
+                course: classSelect.value.trim(), // Stored as 'course' in DB for consistency
+                dueDate: dueDateInput.value.trim(),
+                priority: prioritySelect.value,
+                description: descriptionTextarea.value.trim(),
                 isCompleted: false,
                 createdAt: new Date().toISOString(),
             };
 
-            const assignmentsCol = getAssignmentsCollection();
-            if (!assignmentsCol) {
-                showMessage("Error: Cannot access database collection.", "error");
-                createButton.disabled = false;
-                createButton.textContent = "Create Assignment";
-                return;
-            }
+            const assignmentsCol = collection(db, `artifacts/${appId}/public/data/assignments`);
 
             try {
-                await addDoc(assignmentsCol, newAssignment);
+                await addDoc(assignmentsCol, assignmentData);
                 showMessage("Assignment created successfully!", "success");
                 
-                // Clear the form and reset button
-                form.reset();
-                createButton.disabled = false;
-                createButton.textContent = "Create Assignment";
+                // Redirect user back to the assignments list after a short delay
+                setTimeout(() => {
+                    window.location.href = 'assignments.html';
+                }, 1000);
 
             } catch (error) {
-                console.error("Error adding assignment:", error);
-                showMessage(`Failed to create assignment: ${error.message}`, "error");
+                console.error("Error creating assignment:", error);
+                showMessage("Failed to create assignment. Please try again.", "error");
                 createButton.disabled = false;
-                createButton.textContent = "Create Assignment";
+                createButton.textContent = 'Create Assignment';
             }
         }
-
-        // Event Listener for the footer button
+        
+        // --- Event Listeners ---
+        
+        // Listen to input changes to manage button state
+        titleInput.addEventListener('input', checkFormValidity);
+        classSelect.addEventListener('change', checkFormValidity);
+        dueDateInput.addEventListener('change', checkFormValidity);
+        
+        // Listen for the button click
         createButton.addEventListener('click', handleCreateAssignment);
 
         // Initialize Firebase on load
