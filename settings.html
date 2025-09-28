@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Settings</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        // Tailwind Configuration
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1b2734",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: 100dvh;
+        }
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+        /* Style for the custom toggle switch */
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #137fec; /* primary color */
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
+    <div class="flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="bg-background-light dark:bg-background-dark sticky top-0 z-10 shadow-sm border-b border-slate-200 dark:border-slate-700">
+            <div class="p-4 flex items-center justify-center">
+                <h1 class="text-xl font-bold text-slate-900 dark:text-white">Settings</h1>
+            </div>
+        </header>
+
+        <!-- Message Box for Feedback -->
+        <div id="message-box" class="hidden mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300"></div>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 px-4 py-6 space-y-6 overflow-y-auto max-w-xl mx-auto w-full">
+
+            <!-- Appearance Settings -->
+            <section class="bg-card-light dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 space-y-4">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b pb-2 border-slate-200 dark:border-slate-700">Appearance</h2>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-slate-500 dark:text-slate-400">dark_mode</span>
+                        <p class="font-medium">Dark Mode</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input id="theme-toggle" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Data Management -->
+            <section class="bg-card-light dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 space-y-4">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b pb-2 border-slate-200 dark:border-slate-700">Data &amp; Account</h2>
+                
+                <!-- User ID Display -->
+                <div class="space-y-1">
+                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Your Unique User ID (for collaboration):</p>
+                    <p id="user-id-display" class="font-mono text-xs p-2 bg-background-light dark:bg-slate-700 rounded-lg break-all text-slate-900 dark:text-slate-200">Loading...</p>
+                </div>
+
+                <!-- Clear Data Button -->
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <p class="text-sm text-slate-600 dark:text-slate-300 mb-3">Permanently remove all synced assignments from the database.</p>
+                    <button id="clear-data-button" class="w-full flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-3 rounded-lg font-semibold shadow-md hover:bg-red-700 transition-colors disabled:bg-gray-400">
+                        <span class="material-symbols-outlined">delete_forever</span>
+                        Clear All Assignments Data
+                    </button>
+                    <p id="clear-data-message" class="text-sm text-red-500 mt-2 hidden">Are you sure? This action is irreversible. <button id="confirm-clear-data" class="font-bold underline">Yes, Clear Data</button></p>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer Navigation (Consistent with other pages) -->
+        <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
+            <nav class="flex justify-around p-2">
+                <!-- Dashboard Link -->
+                <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="dashboard.html">
+                    <span class="material-symbols-outlined">home</span>
+                    <span class="text-xs font-medium">Dashboard</span>
+                </a>
+                <!-- Assignments Link -->
+                <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="assignments.html">
+                    <span class="material-symbols-outlined">list_alt</span>
+                    <span class="text-xs font-medium">Assignments</span>
+                </a>
+                <!-- Calendar Link -->
+                <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="index.html">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    <span class="text-xs font-medium">Calendar</span>
+                </a>
+                <!-- Settings Link (Active) -->
+                <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="settings.html">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span class="text-xs font-medium">settings</span>
+                </a>
+            </nav>
+        </footer>
+    </div>
+
+    <!-- Firebase and Application Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, deleteDoc, doc, query, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Set log level for debugging
+        setLogLevel('Debug');
+
+        // Global Firebase variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
+
+        // UI elements
+        const messageBox = document.getElementById('message-box');
+        const themeToggle = document.getElementById('theme-toggle');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const clearDataButton = document.getElementById('clear-data-button');
+        const clearDataMessage = document.getElementById('clear-data-message');
+        const confirmClearDataButton = document.getElementById('confirm-clear-data');
+
+
+        /**
+         * Utility function to display messages.
+         */
+        function showMessage(message, type, duration = 3000) {
+            let bgColor, textColor;
+            
+            switch (type) {
+                case 'success':
+                    bgColor = 'bg-green-100 dark:bg-green-900';
+                    textColor = 'text-green-700 dark:text-green-300';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-100 dark:bg-red-900';
+                    textColor = 'text-red-700 dark:text-red-300';
+                    break;
+                case 'info':
+                    bgColor = 'bg-blue-100 dark:bg-blue-900';
+                    textColor = 'text-blue-700 dark:text-blue-300';
+                    break;
+                default:
+                    bgColor = 'bg-gray-100 dark:bg-gray-700';
+                    textColor = 'text-gray-800 dark:text-gray-200';
+            }
+
+            messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
+            messageBox.innerHTML = message;
+            messageBox.classList.remove('hidden');
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    messageBox.classList.add('opacity-0');
+                    setTimeout(() => messageBox.classList.add('hidden', 'opacity-100'), 300);
+                }, duration);
+            }
+        }
+
+
+        // --- Theme Logic ---
+
+        /**
+         * Applies the theme based on preference.
+         */
+        function applyTheme(isDark) {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.checked = true;
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                themeToggle.checked = false;
+            }
+        }
+
+        /**
+         * Initializes the theme on page load.
+         */
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                applyTheme(true);
+            } else {
+                applyTheme(false);
+            }
+        }
+
+        themeToggle.addEventListener('change', (e) => {
+            applyTheme(e.target.checked);
+        });
+
+
+        // --- Firebase & Data Logic ---
+
+        /**
+         * Initializes Firebase and authenticates the user.
+         */
+        async function initializeFirebase() {
+            if (!firebaseConfig) {
+                userIdDisplay.textContent = "Error: Config missing.";
+                showMessage("Database connection failed. Configuration missing.", "error");
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                userId = auth.currentUser?.uid || crypto.randomUUID();
+                isAuthReady = true;
+                userIdDisplay.textContent = userId;
+                
+            } catch (error) {
+                console.error("Firebase initialization or authentication error:", error);
+                userIdDisplay.textContent = "Error: Auth failed.";
+                showMessage("Authentication failed. Cannot load data.", "error");
+            }
+        }
+
+        /**
+         * Returns the Firestore collection path for public assignments.
+         */
+        function getAssignmentsCollection() {
+            if (!db || !isAuthReady) {
+                return null;
+            }
+            // Public collection path for shared assignments
+            return collection(db, `artifacts/${appId}/public/data/assignments`);
+        }
+        
+        /**
+         * Clears all documents from the assignments collection.
+         */
+        async function clearAllAssignmentsData() {
+            const assignmentsCol = getAssignmentsCollection();
+            if (!assignmentsCol) {
+                showMessage("Database is not ready.", "error");
+                return;
+            }
+
+            clearDataButton.disabled = true;
+            showMessage("Deleting data, please wait...", "info", 0);
+
+            try {
+                const q = query(assignmentsCol);
+                const snapshot = await getDocs(q);
+                let deleteCount = 0;
+
+                const deletePromises = [];
+
+                snapshot.forEach((document) => {
+                    deletePromises.push(deleteDoc(doc(db, assignmentsCol.path, document.id)));
+                    deleteCount++;
+                });
+
+                await Promise.all(deletePromises);
+
+                showMessage(`Successfully deleted ${deleteCount} assignment documents.`, "success");
+                clearDataMessage.classList.add('hidden');
+                clearDataButton.disabled = false;
+
+            } catch (error) {
+                console.error("Error clearing data:", error);
+                showMessage(`Failed to clear data: ${error.message}.`, "error");
+                clearDataButton.disabled = false;
+            }
+        }
+
+        // --- Event Listeners ---
+
+        clearDataButton.addEventListener('click', () => {
+            // Show confirmation message
+            clearDataMessage.classList.remove('hidden');
+        });
+
+        confirmClearDataButton.addEventListener('click', () => {
+            // Initiate deletion
+            clearAllAssignmentsData();
+        });
+
+
+        // --- Initialize App ---
+        initializeTheme();
+        initializeFirebase();
+    </script>
+</body>
+</html>
