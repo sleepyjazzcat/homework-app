@@ -74,6 +74,7 @@
             border-radius: 9999px;
             color: #101922; /* Always dark text for contrast on bright pills */
             text-transform: uppercase;
+            white-space: nowrap;
         }
         .tag-creative { background-color: #4ade80; }
         .tag-test-prep { background-color: #f87171; }
@@ -248,6 +249,18 @@
                 day: 'numeric'
             });
         }
+        
+        /**
+         * Ensures all required fields are present in the assignment object
+         */
+        function normalizeAssignment(assignment) {
+            return {
+                ...assignment,
+                tag: assignment.tag || 'Other', // Crucial fix for old local data
+                description: assignment.description || '',
+                isCompleted: assignment.isCompleted || false
+            };
+        }
 
         // --- Local Storage Functions (Fallback) ---
 
@@ -256,7 +269,8 @@
         function getAssignmentsFromLocal() {
             try {
                 const data = localStorage.getItem(LOCAL_STORAGE_KEY);
-                return data ? JSON.parse(data) : [];
+                const assignments = data ? JSON.parse(data) : [];
+                return assignments.map(normalizeAssignment); // Normalize old data on load
             } catch (e) {
                 console.error("Error reading local storage:", e);
                 return [];
@@ -277,7 +291,7 @@
             const assignments = getAssignmentsFromLocal();
             const index = assignments.findIndex(a => a.id === id);
             if (index !== -1) {
-                assignments[index] = { ...assignments[index], ...updates };
+                assignments[index] = normalizeAssignment({ ...assignments[index], ...updates });
                 saveAssignmentsToLocal(assignments);
             }
         }
@@ -303,7 +317,7 @@
                 console.log("Assignment updated successfully:", id);
             } catch (error) {
                 console.error("Error updating assignment:", error);
-                alert("Failed to update assignment. Check console for details.");
+                // Note: No alert() used, just console error
             }
         }
 
@@ -314,7 +328,7 @@
                 console.log("Assignment deleted successfully:", id);
             } catch (error) {
                 console.error("Error deleting assignment:", error);
-                alert("Failed to delete assignment. Check console for details.");
+                // Note: No alert() used, just console error
             }
         }
 
@@ -372,7 +386,7 @@
                         <p class="font-bold text-lg truncate">${assignment.title}</p>
                         <p class="text-sm text-slate-500 dark:text-slate-400">${assignment.course}</p>
                         <div class="flex items-center space-x-2 mt-1">
-                            <span class="tag-pill ${tagClass}">${assignment.tag || 'Other'}</span>
+                            <span class="tag-pill ${tagClass}">${assignment.tag}</span>
                             <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Due: ${dueDate}</span>
                         </div>
                     </div>
@@ -516,6 +530,7 @@
         }
 
         window.showDetailView = async function(id) {
+            // Find the assignment using the local or global list
             const assignment = isLocalMode 
                 ? getAssignmentsFromLocal().find(a => a.id === id)
                 : window.currentAssignments.find(a => a.id === id);
@@ -610,7 +625,9 @@
                 // Database Mode
                 const assignmentsCol = getAssignmentsCollection();
                 if (!assignmentsCol) {
-                    console.error("Assignments collection is null in setupDataListener. Fallback likely failed.");
+                    // This case should be rare if fallback worked, but handles auth issues
+                    isLocalMode = true; // Fallback just in case
+                    setupDataListener(); 
                     return; 
                 }
 
@@ -619,17 +636,19 @@
                 onSnapshot(q, (snapshot) => {
                     const assignments = [];
                     snapshot.forEach(doc => {
-                        assignments.push({ id: doc.id, ...doc.data() });
+                        assignments.push(normalizeAssignment({ id: doc.id, ...doc.data() }));
                     });
                     window.currentAssignments = assignments; // Store globally for detail view lookups
                     renderAssignments(filterAssignments(assignments, currentFilter));
                 }, (error) => {
                     console.error("Error fetching assignments from Firestore:", error);
-                    // If Firestore fails during listen, we don't automatically fall back to Local Mode mid-session
+                    // If Firestore fails during listen, we switch to local mode
+                    isLocalMode = true;
+                    setupDataListener();
                 });
                 
                 connectionStatusEl.textContent = "Connected to Database (Shared)";
-                connectionStatusEl.classList.remove('text-slate-500', 'bg-red-200', 'dark:bg-red-900');
+                connectionStatusEl.classList.remove('text-slate-500', 'bg-red-200', 'dark:bg-red-900', 'text-red-700');
                 connectionStatusEl.classList.add('text-green-700', 'bg-green-200', 'dark:bg-green-900');
             } else {
                 // Local Storage Mode
@@ -638,7 +657,7 @@
                 renderAssignments(filterAssignments(assignments, currentFilter));
                 
                 connectionStatusEl.textContent = "Local Mode (Browser Storage)";
-                connectionStatusEl.classList.remove('text-slate-500', 'bg-green-200', 'dark:bg-green-900');
+                connectionStatusEl.classList.remove('text-slate-500', 'bg-green-200', 'dark:bg-green-900', 'text-green-700');
                 connectionStatusEl.classList.add('text-red-700', 'bg-red-200', 'dark:bg-red-900');
             }
         }
@@ -654,6 +673,7 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
+                // If the app initializes, try to authenticate
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
@@ -709,7 +729,7 @@
         window.addEventListener('hashchange', () => {
              // If hash is cleared, hide detail view (handled by hideDetailView)
              if (window.location.hash === '') {
-                 // Do nothing, hideDetailView handles the hash clear
+                 // The hash change handler for the 'close' action is silent
              } else {
                  checkUrlForDetailView();
              }
@@ -717,6 +737,7 @@
         
         // Start the application
         startApplication().then(() => {
+            // After data is loaded, check if a detail view should be open
             checkUrlForDetailView();
         });
     </script>
