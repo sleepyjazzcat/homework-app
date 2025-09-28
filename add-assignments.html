@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>New Assignment</title>
+    <title>Add New Assignment</title>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
@@ -19,14 +19,11 @@
                         "primary": "#137fec",
                         "background-light": "#f6f7f8",
                         "background-dark": "#101922",
-                        "foreground-light": "#101922",
-                        "foreground-dark": "#f6f7f8",
                         "card-light": "#ffffff",
                         "card-dark": "#1b2734",
-                        "input-light": "#eef1f4",
-                        "input-dark": "#2a3b4c",
-                        "placeholder-light": "#6b7f99",
-                        "placeholder-dark": "#8a9eb5",
+                        "accent-red": "#ef4444",
+                        "accent-green": "#10b981",
+                        "accent-blue": "#3b82f6",
                     },
                     fontFamily: {
                         "display": ["Lexend", "sans-serif"]
@@ -42,6 +39,9 @@
         }
     </script>
     <style>
+        body {
+            min-height: 100dvh;
+        }
         .material-symbols-outlined {
             font-variation-settings:
             'FILL' 0,
@@ -49,107 +49,126 @@
             'GRAD' 0,
             'opsz' 24
         }
-        body {
-            min-height: 100dvh;
-        }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-foreground-light dark:text-foreground-dark flex flex-col min-h-screen">
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 flex flex-col min-h-screen">
 
-    <header class="flex items-center p-4 border-b border-input-light dark:border-input-dark bg-card-light dark:bg-card-dark sticky top-0 z-10">
-        <a href="dashboard.html" class="p-2 text-foreground-light dark:text-foreground-dark">
-            <span class="material-symbols-outlined">close</span>
-        </a>
-        <h1 class="flex-1 text-lg font-bold text-center -ml-10">New Assignment</h1>
+    <!-- Header -->
+    <header class="bg-card-light dark:bg-card-dark sticky top-0 z-10 shadow-md border-b border-slate-200 dark:border-slate-700">
+        <div class="p-4 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white">New Assignment</h1>
+            <a href="assignments.html" class="p-2 text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors">
+                <span class="material-symbols-outlined text-2xl">close</span>
+            </a>
+        </div>
     </header>
 
     <!-- Message Box for Feedback -->
     <div id="message-box" class="mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 hidden"></div>
 
+    <!-- Main Content: Form -->
     <main class="flex-1 p-4 overflow-y-auto">
-        <form id="assignment-form" class="space-y-6">
-            <div>
-                <label class="sr-only" for="assignment-name">Assignment Name</label>
-                <input class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="assignment-name" placeholder="Assignment Name" type="text" required/>
-            </div>
+        <form id="assignment-form" class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg space-y-6">
             
-            <div>
-                <label class="sr-only" for="course">Class</label>
-                <div class="relative">
-                    <select class="w-full appearance-none bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 text-foreground-light dark:text-foreground-dark focus:ring-2 focus:ring-primary [&:not([value])]:text-placeholder-light dark:[&:not([value])]:text-placeholder-dark" id="course" required>
-                        <option value="" disabled selected>Class (Required)</option>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Science">Science</option>
-                        <option value="History">History</option>
-                        <option value="English">English</option>
-                        <option value="Art">Art</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">expand_more</span>
+            <!-- Connection Status -->
+            <div id="connection-status" class="text-center p-3 rounded-lg text-sm font-medium">
+                Waiting for Connection...
+            </div>
+
+            <!-- Title -->
+            <div class="space-y-2">
+                <label for="title" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Assignment Title</label>
+                <input type="text" id="title" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-primary focus:ring-primary bg-slate-100 dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder="e.g., Final Essay on Moby Dick">
+            </div>
+
+            <!-- Course -->
+            <div class="space-y-2">
+                <label for="course" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Course / Subject</label>
+                <input type="text" id="course" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-primary focus:ring-primary bg-slate-100 dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder="e.g., English Literature 101">
+            </div>
+
+            <!-- Due Date and Priority -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label for="dueDate" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Due Date</label>
+                    <input type="date" id="dueDate" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-primary focus:ring-primary bg-slate-100 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
                 </div>
-            </div>
-            
-            <div>
-                <label class="sr-only" for="due-date">Due Date</label>
-                <div class="relative">
-                    <!-- Note: Type is text initially, switches to date on focus -->
-                    <input class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="due-date" onblur="(this.type='text')" onfocus="(this.type='date')" placeholder="Due Date (Required)" type="text" required/>
-                    <span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">calendar_today</span>
+                <div class="space-y-2">
+                    <label for="priority" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Priority</label>
+                    <select id="priority" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-primary focus:ring-primary bg-slate-100 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="High">High</option>
+                    </select>
                 </div>
             </div>
 
-            <div>
-                <label class="sr-only" for="priority">Priority</label>
-                <div class="relative">
-                    <select class="w-full appearance-none bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 text-foreground-light dark:text-foreground-dark focus:ring-2 focus:ring-primary" id="priority">
-                        <option value="Low" selected>Priority: Low</option>
-                        <option value="Medium">Priority: Medium</option>
-                        <option value="High">Priority: High</option>
-                    </select>
-                    <span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">expand_more</span>
-                </div>
+            <!-- Notes -->
+            <div class="space-y-2">
+                <label for="notes" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Notes (Optional)</label>
+                <textarea id="notes" rows="3" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-primary focus:ring-primary bg-slate-100 dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder="Key instructions, resources, or reminders."></textarea>
             </div>
-            
-            <div>
-                <label class="sr-only" for="description">Description</label>
-                <textarea class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg p-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="description" placeholder="Description (Optional)" rows="4"></textarea>
-            </div>
-            
+
+            <!-- Submission Button -->
+            <button type="submit" id="submit-button" class="w-full flex items-center justify-center p-3 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition-colors disabled:opacity-50" disabled>
+                <span class="material-symbols-outlined mr-2">add_task</span>
+                <span id="button-text">Waiting for Connection...</span>
+            </button>
         </form>
     </main>
-    
-    <footer class="p-4 border-t border-input-light dark:border-input-dark bg-card-light dark:bg-card-dark">
-        <button id="create-button" class="w-full bg-primary text-white font-bold h-12 rounded-lg text-base tracking-wide transition-colors disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed" disabled>
-            Initializing...
-        </button>
+
+    <!-- Footer Navigation (Consistent with other pages) -->
+    <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
+        <nav class="flex justify-around p-2">
+            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="dashboard.html">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-xs font-medium">Dashboard</span>
+            </a>
+            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="assignments.html">
+                <span class="material-symbols-outlined">list_alt</span>
+                <span class="text-xs font-medium">Assignments</span>
+            </a>
+            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="index.html">
+                <span class="material-symbols-outlined">calendar_month</span>
+                <span class="text-xs font-medium">Calendar</span>
+            </a>
+            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="settings.html">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="text-xs font-medium">Settings</span>
+            </a>
+        </nav>
     </footer>
 
     <!-- Firebase and Application Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, addDoc, collection, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         setLogLevel('Debug');
 
+        // Global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
+        // Application State
         let db = null;
-        let isAuthReady = false;
+        let auth = null;
         let isLocalMode = false;
         const LOCAL_STORAGE_KEY = `academicPlanner_assignments_${appId}`;
 
-        // UI elements
+        // UI Elements
         const form = document.getElementById('assignment-form');
-        const createButton = document.getElementById('create-button');
-        const messageBox = document.getElementById('message-box');
+        const submitButton = document.getElementById('submit-button');
+        const buttonText = document.getElementById('button-text');
+        const connectionStatusDiv = document.getElementById('connection-status');
 
         /**
          * Utility function to display messages.
          */
         function showMessage(message, type, duration = 3000) {
+            const messageBox = document.getElementById('message-box');
             let bgColor, textColor;
             switch (type) {
                 case 'success':
@@ -180,104 +199,112 @@
                 }, duration);
             }
         }
-        
+
+        /* --- DATA MANIPULATION FUNCTIONS --- */
+
         /**
-         * Checks required fields and toggles the button state.
+         * Clears all input fields after successful submission.
          */
-        function validateForm() {
-            if (!isAuthReady && !isLocalMode) {
-                createButton.disabled = true;
-                return;
-            }
-
-            const isTitleValid = document.getElementById('assignment-name').value.trim() !== '';
-            const isClassValid = document.getElementById('course').value.trim() !== '';
-            const isDateValid = document.getElementById('due-date').value.trim() !== '';
-
-            createButton.disabled = !(isTitleValid && isClassValid && isDateValid);
+        function clearForm() {
+            form.reset();
+            // Reset to default Medium priority
+            document.getElementById('priority').value = 'Medium'; 
+            // Put focus back on the title
+            document.getElementById('title').focus(); 
         }
 
         /**
-         * Handles saving data to Local Storage.
+         * Saves assignment data to Firebase Firestore.
          */
-        function saveToLocalStorage(assignmentData) {
+        async function saveAssignmentFirestore(assignmentData) {
             try {
-                // Get existing assignments or initialize an empty array
-                const existingAssignments = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+                // Ensure auth is ready and db is initialized
+                if (!db || !auth.currentUser) {
+                    throw new Error("Database not connected or user not authenticated.");
+                }
                 
-                // Add new assignment with a temporary ID
-                const newAssignment = {
-                    ...assignmentData,
-                    id: Date.now().toString(), // Simple unique ID for local storage
-                    createdAt: new Date().toISOString()
-                };
+                // Define the public collection path
+                const assignmentsCol = collection(db, `artifacts/${appId}/public/data/assignments`);
                 
-                existingAssignments.push(newAssignment);
+                // Add the new document
+                const docRef = await addDoc(assignmentsCol, assignmentData);
                 
-                // Save back to local storage
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(existingAssignments));
-                
-                return { success: true };
+                showMessage("Assignment created successfully (Database mode).", "success");
+                clearForm();
 
             } catch (error) {
-                console.error("Local Storage save error:", error);
-                return { success: false, error: "Failed to save data locally." };
+                console.error("Error writing document to Firestore:", error);
+                showMessage(`Error saving assignment to database: ${error.message}.`, "error");
+            } finally {
+                submitButton.disabled = false;
+            }
+        }
+
+        /**
+         * Reads all assignments from local storage.
+         */
+        function getAssignmentsFromLocal() {
+            try {
+                const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+                return data ? JSON.parse(data) : [];
+            } catch (error) {
+                console.error("Error reading from local storage:", error);
+                return [];
             }
         }
         
         /**
-         * Handles the form submission event.
+         * Saves assignment data to local storage (Critical Fix implemented here).
          */
-        async function handleCreateAssignment(event) {
-            event.preventDefault();
-            createButton.disabled = true;
-            createButton.textContent = 'Saving...';
+        function saveAssignmentLocal(assignmentData) {
+            try {
+                // 1. Give the assignment a unique ID, required for CRUD operations later
+                assignmentData.id = crypto.randomUUID(); 
+                
+                // 2. Fetch existing data
+                const assignments = getAssignmentsFromLocal();
 
-            if (!isAuthReady && !isLocalMode) {
-                 showMessage("Error: Connection is not ready.", "error");
-                 createButton.textContent = 'Create Assignment';
-                 validateForm();
-                 return;
+                // 3. Append the new assignment
+                assignments.push(assignmentData);
+
+                // 4. Save the entire array back to local storage
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(assignments));
+
+                showMessage("Assignment created successfully (Local Mode).", "success");
+                clearForm();
+
+            } catch (error) {
+                console.error("Error writing to local storage:", error);
+                showMessage("Error: Failed to save assignment locally.", "error");
+            } finally {
+                submitButton.disabled = false;
             }
-            
+        }
+
+        /* --- FORM SUBMISSION HANDLER --- */
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitButton.disabled = true;
+
             const assignmentData = {
-                title: document.getElementById('assignment-name').value.trim(),
+                title: document.getElementById('title').value,
                 course: document.getElementById('course').value,
-                dueDate: document.getElementById('due-date').value,
+                dueDate: document.getElementById('dueDate').value, // YYYY-MM-DD format
                 priority: document.getElementById('priority').value,
-                description: document.getElementById('description').value.trim(),
-                isCompleted: false,
+                notes: document.getElementById('notes').value,
+                createdAt: new Date().toISOString(),
+                isCompleted: false, // Default status
             };
 
-            let result;
-
             if (isLocalMode) {
-                // LOCAL STORAGE MODE
-                result = saveToLocalStorage(assignmentData);
+                saveAssignmentLocal(assignmentData);
             } else {
-                // FIREBASE MODE
-                try {
-                    const assignmentsCol = collection(db, `artifacts/${appId}/public/data/assignments`);
-                    await addDoc(assignmentsCol, assignmentData);
-                    result = { success: true };
-                } catch (error) {
-                    console.error("Firestore save error:", error);
-                    result = { success: false, error: "Failed to save to database." };
-                }
+                await saveAssignmentFirestore(assignmentData);
             }
+        });
 
-            if (result.success) {
-                showMessage("Assignment created successfully!", "success");
-                setTimeout(() => {
-                    // Redirect back to the main assignments list
-                    window.location.href = 'assignments.html';
-                }, 1000);
-            } else {
-                showMessage(`Error creating assignment: ${result.error}`, "error", 5000);
-                createButton.textContent = 'Create Assignment';
-            }
-            validateForm();
-        }
+        /* --- INITIALIZATION --- */
 
         /**
          * Initializes Firebase or falls back to Local Mode.
@@ -286,49 +313,44 @@
             if (!firebaseConfig) {
                 isLocalMode = true;
                 console.warn("Firebase configuration missing. Switching to Local Mode.");
-                createButton.textContent = 'Create Assignment (Local Mode)';
-                isAuthReady = true; // Signal readiness for Local Mode
-                showMessage("Database connection missing. Data will be saved only in your browser (Local Mode).", "info", 0);
+                connectionStatusDiv.textContent = 'Local Mode (Data is saved only in this browser)';
+                connectionStatusDiv.classList.add('bg-orange-100', 'text-orange-800', 'dark:bg-orange-800', 'dark:text-orange-200');
+                
+                buttonText.textContent = 'Create Assignment (Local Mode)';
+                submitButton.disabled = false;
+                
             } else {
                 try {
                     const app = initializeApp(firebaseConfig);
                     db = getFirestore(app);
-                    const auth = getAuth(app);
+                    auth = getAuth(app);
                     
+                    // Attempt to authenticate
                     if (initialAuthToken) {
                         await signInWithCustomToken(auth, initialAuthToken);
                     } else {
                         await signInAnonymously(auth);
                     }
-
-                    isAuthReady = true;
-                    console.log("Firebase initialized and ready.");
-                    createButton.textContent = 'Create Assignment';
-                    showMessage("Connected to database. Data is shared and persistent.", "success");
+                    
+                    connectionStatusDiv.textContent = 'Database Connected (Shared Data)';
+                    connectionStatusDiv.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-800', 'dark:text-green-200');
+                    buttonText.textContent = 'Create Assignment';
+                    submitButton.disabled = false;
                     
                 } catch (error) {
-                    // If Firebase initialization fails despite having config (e.g., rules error), fall back to local
                     console.error("Firebase initialization failed, falling back to Local Mode:", error);
                     isLocalMode = true;
-                    isAuthReady = true;
-                    createButton.textContent = 'Create Assignment (Local Mode)';
-                    showMessage("Database connection failed. Data will be saved only in your browser (Local Mode).", "info", 0);
+                    connectionStatusDiv.textContent = 'Local Mode (Database connection failed)';
+                    connectionStatusDiv.classList.add('bg-orange-100', 'text-orange-800', 'dark:bg-orange-800', 'dark:text-orange-200');
+                    buttonText.textContent = 'Create Assignment (Local Mode)';
+                    submitButton.disabled = false;
                 }
             }
-            
-            // Add listeners after mode is determined
-            form.addEventListener('input', validateForm);
-            form.addEventListener('submit', handleCreateAssignment);
-            validateForm(); // Initial validation check
         }
-        
+
         // Initialize the app on load
         initializeFirebase();
 
-        // Handle Dark Mode preference on load
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.documentElement.classList.add('dark');
-        }
     </script>
 </body>
 </html>
