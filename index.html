@@ -1,134 +1,417 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>New Assignment</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-<script>
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "primary": "#137fec",
-            "background-light": "#f6f7f8",
-            "background-dark": "#101922",
-            "foreground-light": "#101922",
-            "foreground-dark": "#f6f7f8",
-            "card-light": "#ffffff",
-            "card-dark": "#1b2734",
-            "input-light": "#eef1f4",
-            "input-dark": "#2a3b4c",
-            "placeholder-light": "#6b7f99",
-            "placeholder-dark": "#8a9eb5",
-          },
-          fontFamily: {
-            "display": ["Lexend", "sans-serif"]
-          },
-          borderRadius: {
-            "DEFAULT": "0.25rem",
-            "lg": "0.5rem",
-            "xl": "0.75rem",
-            "full": "9999px"
-          },
-        },
-      },
-    }
-  </script>
-<style>
-    .material-symbols-outlined {
-      font-variation-settings:
-      'FILL' 0,
-      'wght' 400,
-      'GRAD' 0,
-      'opsz' 24
-    }
-  </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-foreground-light dark:text-foreground-dark">
-<div class="flex flex-col h-screen">
-<header class="flex items-center p-4 border-b border-input-light dark:border-input-dark">
-<button class="p-2 text-foreground-light dark:text-foreground-dark">
-<span class="material-symbols-outlined">close</span>
-</button>
-<h1 class="flex-1 text-lg font-bold text-center -ml-10">New Assignment</h1>
-</header>
-<main class="flex-1 p-4 overflow-y-auto">
-<form class="space-y-6">
-<div>
-<label class="sr-only" for="assignment-name">Assignment Name</label>
-<input class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="assignment-name" placeholder="Assignment Name" type="text"/>
-</div>
-<div>
-<label class="sr-only" for="course">Course</label>
-<div class="relative">
-<select class="w-full appearance-none bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 text-foreground-light dark:text-foreground-dark focus:ring-2 focus:ring-primary" id="course">
-<option class="text-placeholder-light dark:text-placeholder-dark" disabled="" selected="">Course</option>
-<option value="math">Mathematics</option>
-<option value="science">Science</option>
-<option value="history">History</option>
-<option value="english">English</option>
-</select>
-<span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">expand_more</span>
-</div>
-</div>
-<div>
-<label class="sr-only" for="due-date">Due Date</label>
-<div class="relative">
-<input class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-14 px-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="due-date" onblur="(this.type='text')" onfocus="(this.type='date')" placeholder="Due Date" type="text"/>
-<span class="material-symbols-outlined absolute top-1/2 right-4 -translate-y-1/2 pointer-events-none text-placeholder-light dark:text-placeholder-dark">calendar_today</span>
-</div>
-</div>
-<div>
-<label class="sr-only" for="description">Description</label>
-<textarea class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg p-4 placeholder-placeholder-light dark:placeholder-placeholder-dark focus:ring-2 focus:ring-primary" id="description" placeholder="Description" rows="4"></textarea>
-</div>
-<div class="flex items-center justify-between bg-card-light dark:bg-card-dark p-4 rounded-lg">
-<span class="font-medium">Set Reminder</span>
-<label class="relative inline-flex items-center cursor-pointer">
-<input class="sr-only peer" type="checkbox" value=""/>
-<div class="w-11 h-6 bg-input-light dark:bg-input-dark rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:border-gray-300 dark:after:border-gray-600 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-</label>
-</div>
-</form>
-</main>
-<footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
-<nav class="flex justify-around p-2">
-<a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="dashboard.html">
-<svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
-<path d="M224,115.55V208a16,16,0,0,1-16,16H168a16,16,0,0,1-16-16V168a8,8,0,0,0-8-8H112a8,8,0,0,0-8,8v40a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V115.55a16,16,0,0,1,5.17-11.78l80-75.48.11-.11a16,16,0,0,1,21.53,0,1.14,1.14,0,0,0,.11.11l80,75.48A16,16,0,0,1,224,115.55Z"></path>
-</svg>
-<span class="text-xs font-medium">Dashboard</span>
-</a>
-<a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="assignments.html">
-<svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
-<path d="M80,64a8,8,0,0,1,8-8H216a8,8,0,0,1,0,16H88A8,8,0,0,1,80,64Zm136,56H88a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Zm0,64H88a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16ZM44,52A12,12,0,1,0,56,64,12,12,0,0,0,44,52Zm0,64a12,12,0,1,0,12,12A12,12,0,0,0,44,116Zm0,64a12,12,0,1,0,12,12A12,12,0,0,0,44,180Z"></path>
-</svg>
-<span class="text-xs font-medium">Assignments</span>
-</a>
-<a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="index.html">
-<svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
-<path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z"></path>
-</svg>
-<span class="text-xs font-medium">Calendar</span>
-</a>
-<a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="settings.html">
-<svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
-<path d="M216.49,108.77l-23.72-2.64a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74l-17.74,14.19a91.57,91.57,0,0,1-15-6.23L82.89,141a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,124.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,54.45a91.57,91.57,0,0,1,6.23-15L69,42.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14,8,8,0,0,0,2.64-5.1L85.4,4.43A91.32,91.32,0,0,1,100.45,0l17.74,14.19a8,8,0,0,0,5.48,1.74h.48a73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,0a91.57,91.57,0,0,1,15,6.23l2.51,22.58a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74a8,8,0,0,0-1.74,5.48,73.93,73.93,0,0,1,0,8.68A8,8,0,0,0,202.23,91l14.19,17.74A91.57,91.57,0,0,1,216.49,108.77ZM128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"></path>
-</svg>
-<span class="text-xs font-medium">Settings</span>
-</a>
-</nav>
-</footer>
-</div>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Calendar View</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        // Tailwind Configuration
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1b2734",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: 100dvh;
+        }
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+        .day-cell {
+            position: relative;
+            padding-top: 100%; /* Makes cells square */
+            text-align: center;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+        .day-number {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: calc(100% - 10px);
+            height: calc(100% - 10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.5rem;
+            line-height: 1;
+        }
+        .has-assignment:after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--assignment-dot-color, #137fec);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
+    <div class="flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="bg-background-light dark:bg-background-dark sticky top-0 z-10 shadow-sm border-b border-slate-200 dark:border-slate-700">
+            <div class="p-4 flex items-center justify-center">
+                <h1 class="text-xl font-bold text-slate-900 dark:text-white">Academic Calendar</h1>
+            </div>
+        </header>
 
-</body></html>
+        <!-- Message Box for Feedback -->
+        <div id="message-box" class="hidden mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300"></div>
+
+
+        <!-- Main Content Area -->
+        <main class="flex-1 px-4 py-6 space-y-6 overflow-y-auto max-w-lg mx-auto w-full">
+
+            <!-- Month Navigation -->
+            <div class="flex justify-between items-center bg-card-light dark:bg-slate-800 p-3 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700">
+                <button id="prev-month" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                    <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">chevron_left</span>
+                </button>
+                <h2 id="current-month-year" class="text-2xl font-bold text-slate-900 dark:text-white"></h2>
+                <button id="next-month" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                    <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">chevron_right</span>
+                </button>
+            </div>
+
+            <!-- Calendar Grid -->
+            <div class="bg-card-light dark:bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700">
+                <div class="grid grid-cols-7 gap-1 mb-2 font-semibold text-sm text-slate-500 dark:text-slate-400">
+                    <div class="text-center">S</div>
+                    <div class="text-center">M</div>
+                    <div class="text-center">T</div>
+                    <div class="text-center">W</div>
+                    <div class="text-center">T</div>
+                    <div class="text-center">F</div>
+                    <div class="text-center">S</div>
+                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1">
+                    <!-- Calendar days will be rendered here -->
+                    <p id="loading-indicator" class="col-span-7 text-center text-slate-500 dark:text-slate-400 p-4">Loading calendar data...</p>
+                </div>
+            </div>
+
+            <!-- Assignment Details for Selected Day -->
+            <div id="day-details" class="hidden space-y-3 p-4 bg-card-light dark:bg-slate-800 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700">
+                <h3 class="text-xl font-bold border-b pb-2 border-slate-200 dark:border-slate-700">Assignments for <span id="selected-date-display"></span></h3>
+                <div id="assignment-details-list" class="space-y-2">
+                    <p class="text-slate-500 dark:text-slate-400">Select a day to see assignments.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer Navigation (Consistent with Dashboard) -->
+        <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
+            <nav class="flex justify-around p-2">
+                <!-- Dashboard Link -->
+                <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="dashboard.html">
+                    <span class="material-symbols-outlined">home</span>
+                    <span class="text-xs font-medium">Dashboard</span>
+                </a>
+                <!-- Assignments Link -->
+                <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="assignments.html">
+                    <span class="material-symbols-outlined">list_alt</span>
+                    <span class="text-xs font-medium">Assignments</span>
+                </a>
+                <!-- Calendar Link (Active) -->
+                <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="index.html">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    <span class="text-xs font-medium">Calendar</span>
+                </a>
+                <!-- Settings Link -->
+                <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="settings.html">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span class="text-xs font-medium">settings</span>
+                </a>
+            </nav>
+        </footer>
+    </div>
+
+    <!-- Firebase and Application Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Set log level for debugging
+        setLogLevel('Debug');
+
+        // Global Firebase variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
+        let allAssignments = []; // Store all assignments globally
+        let currentCalendarDate = new Date(); // Tracks the month currently displayed
+
+        // UI Elements
+        const calendarGrid = document.getElementById('calendar-grid');
+        const currentMonthYear = document.getElementById('current-month-year');
+        const prevMonthButton = document.getElementById('prev-month');
+        const nextMonthButton = document.getElementById('next-month');
+        const dayDetails = document.getElementById('day-details');
+        const selectedDateDisplay = document.getElementById('selected-date-display');
+        const assignmentDetailsList = document.getElementById('assignment-details-list');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const messageBox = document.getElementById('message-box');
+
+        const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        /**
+         * Utility function to display messages.
+         */
+        function showMessage(message, type, duration = 3000) {
+            let bgColor, textColor;
+            switch (type) {
+                case 'success':
+                    bgColor = 'bg-green-100 dark:bg-green-900';
+                    textColor = 'text-green-700 dark:text-green-300';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-100 dark:bg-red-900';
+                    textColor = 'text-red-700 dark:text-red-300';
+                    break;
+                default:
+                    bgColor = 'bg-gray-100 dark:bg-gray-700';
+                    textColor = 'text-gray-800 dark:text-gray-200';
+            }
+
+            messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
+            messageBox.innerHTML = message;
+            messageBox.classList.remove('hidden');
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    messageBox.classList.add('opacity-0');
+                    setTimeout(() => messageBox.classList.add('hidden', 'opacity-100'), 300);
+                }, duration);
+            }
+        }
+
+        /**
+         * Initializes Firebase and authenticates the user.
+         */
+        async function initializeFirebase() {
+            if (!firebaseConfig) {
+                showMessage("Database connection failed. Configuration missing.", "error");
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                userId = auth.currentUser?.uid || crypto.randomUUID();
+                isAuthReady = true;
+                console.log("Firebase initialized. User ID:", userId);
+
+                startRealtimeAssignmentListener();
+                
+            } catch (error) {
+                console.error("Firebase initialization or authentication error:", error);
+                showMessage("Authentication failed. Cannot load data.", "error");
+            }
+        }
+
+        /**
+         * Returns the Firestore collection path for public assignments.
+         */
+        function getAssignmentsCollection() {
+            if (!db || !isAuthReady) {
+                return null;
+            }
+            return collection(db, `artifacts/${appId}/public/data/assignments`);
+        }
+        
+        /**
+         * Sets up the real-time listener for assignments.
+         */
+        function startRealtimeAssignmentListener() {
+            const assignmentsCol = getAssignmentsCollection();
+            if (!assignmentsCol) return;
+
+            const q = query(assignmentsCol);
+
+            onSnapshot(q, (snapshot) => {
+                allAssignments = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    // Only track non-completed assignments for the calendar
+                    if (!data.isCompleted) {
+                         allAssignments.push({ id: doc.id, ...data });
+                    }
+                });
+                
+                renderCalendar(); // Re-render calendar whenever data changes
+                if (loadingIndicator) {
+                    loadingIndicator.classList.add('hidden');
+                }
+
+            }, (error) => {
+                console.error("Error fetching assignments:", error);
+                if (loadingIndicator) {
+                    loadingIndicator.textContent = "Failed to load data.";
+                }
+                showMessage("Failed to load assignment data.", "error");
+            });
+        }
+
+        /**
+         * Renders the calendar grid for the current month.
+         */
+        function renderCalendar() {
+            calendarGrid.innerHTML = '';
+            dayDetails.classList.add('hidden');
+            
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            currentMonthYear.textContent = `${MONTH_NAMES[month]} ${year}`;
+
+            const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 (Sunday) to 6 (Saturday)
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Add leading blank days
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                const blank = document.createElement('div');
+                blank.className = 'day-cell';
+                calendarGrid.appendChild(blank);
+            }
+
+            // Add day cells
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDate = new Date(year, month, day);
+                const dayString = dayDate.toISOString().split('T')[0];
+                const assignmentsToday = allAssignments.filter(a => a.dueDate.startsWith(dayString));
+                
+                const cell = document.createElement('div');
+                cell.className = 'day-cell group';
+                cell.dataset.date = dayString;
+
+                const dayNumberElement = document.createElement('div');
+                dayNumberElement.className = 'day-number text-lg text-slate-800 dark:text-slate-200 group-hover:bg-primary/20 transition-colors';
+                dayNumberElement.textContent = day;
+
+                // Highlight today
+                const today = new Date();
+                const isToday = dayDate.toDateString() === today.toDateString();
+                if (isToday) {
+                    dayNumberElement.classList.add('bg-primary/50', 'text-white', 'dark:bg-primary/50');
+                }
+
+                // Add assignment indicator
+                if (assignmentsToday.length > 0) {
+                    dayNumberElement.classList.add('has-assignment');
+                    dayNumberElement.style.setProperty('--assignment-dot-color', '#137fec');
+                }
+                
+                // Add click listener
+                cell.addEventListener('click', () => showDayDetails(dayString, assignmentsToday));
+
+                cell.appendChild(dayNumberElement);
+                calendarGrid.appendChild(cell);
+            }
+        }
+        
+        /**
+         * Updates the sidebar with assignments for a selected day.
+         */
+        function showDayDetails(dateString, assignments) {
+            // Remove highlighting from previously selected cell
+            document.querySelectorAll('.day-number.bg-primary').forEach(el => {
+                el.classList.remove('bg-primary', 'text-white', 'dark:bg-primary/50');
+                if (el.textContent === new Date().getDate().toString()) {
+                     el.classList.add('bg-primary/50');
+                }
+            });
+
+            // Add highlighting to the new selected cell
+            const selectedCell = document.querySelector(`[data-date="${dateString}"] .day-number`);
+            if (selectedCell) {
+                selectedCell.classList.add('bg-primary', 'text-white');
+            }
+
+            const formattedDate = new Date(dateString + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            selectedDateDisplay.textContent = formattedDate;
+            assignmentDetailsList.innerHTML = '';
+            dayDetails.classList.remove('hidden');
+
+            if (assignments.length === 0) {
+                assignmentDetailsList.innerHTML = '<p class="text-slate-500 dark:text-slate-400">No assignments due on this day.</p>';
+                return;
+            }
+
+            assignments.forEach(a => {
+                const item = document.createElement('a');
+                item.href = `assignments.html?id=${a.id}`;
+                item.className = 'block p-3 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors cursor-pointer';
+                item.innerHTML = `
+                    <p class="font-bold text-slate-900 dark:text-white">${a.title}</p>
+                    <p class="text-sm text-primary">${a.course}</p>
+                    <div class="mt-1 flex gap-2 items-center">
+                        <span class="text-xs px-2 py-0.5 rounded-full text-white ${a.priority === 'High' ? 'bg-red-500' : (a.priority === 'Medium' ? 'bg-orange-500' : 'bg-slate-500')}">${a.priority || 'Low'} Priority</span>
+                        <span class="text-xs text-slate-600 dark:text-slate-400">Due: ${new Date(a.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }</span>
+                    </div>
+                `;
+                assignmentDetailsList.appendChild(item);
+            });
+        }
+        
+        // Event Listeners for month navigation
+        prevMonthButton.addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        nextMonthButton.addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        // Initialize on load
+        initializeFirebase();
+    </script>
+</body>
+</html>
