@@ -8,7 +8,7 @@
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     <script>
         // Tailwind Configuration
         tailwind.config = {
@@ -21,6 +21,9 @@
                         "background-dark": "#101922",
                         "card-light": "#ffffff",
                         "card-dark": "#1b2734",
+                        "accent-red": "#ef4444",
+                        "accent-green": "#10b981",
+                        "accent-blue": "#3b82f6",
                     },
                     fontFamily: {
                         "display": ["Lexend"]
@@ -50,69 +53,100 @@
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
     <div class="flex flex-col min-h-screen">
-        <header class="bg-background-light dark:bg-background-dark sticky top-0 z-10 shadow-sm border-b border-slate-200 dark:border-slate-700">
+        <!-- Header -->
+        <header class="bg-card-light dark:bg-card-dark sticky top-0 z-10 shadow-md border-b border-slate-200 dark:border-slate-700">
             <div class="p-4 flex items-center justify-center">
-                <h1 class="text-xl font-bold text-slate-900 dark:text-white">Academic Planner</h1>
+                <h1 class="text-xl font-bold text-slate-900 dark:text-white">Academic Dashboard</h1>
             </div>
         </header>
-
+        
+        <!-- Message Box for Feedback -->
         <div id="message-box" class="hidden mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300"></div>
 
-        <main class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+        <!-- Main Content Area -->
+        <main class="flex-1 px-4 py-6 overflow-y-auto">
             
-            <a href="add-assignments.html" class="block bg-primary text-white p-6 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 space-y-2 hover:bg-blue-600 transition-colors">
+            <!-- Add Assignment Card -->
+            <a href="add-assignments.html" class="block w-full bg-primary text-white p-5 rounded-xl shadow-lg hover:shadow-xl transition-all mb-6">
                 <div class="flex items-center justify-center gap-4">
-                    <span class="material-symbols-outlined text-4xl font-light">add_circle</span>
-                    <h2 class="text-2xl font-bold">Add New Assignment</h2>
+                    <span class="material-symbols-outlined text-4xl">add_circle</span>
+                    <span class="text-2xl font-bold">Add New Assignment</span>
                 </div>
-                <p class="text-sm text-center opacity-90">Manually input details for a new task or exam.</p>
             </a>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-card-light dark:bg-slate-800 p-4 rounded-xl shadow-md border border-slate-100 dark:border-slate-700">
-                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Upcoming Tasks</p>
-                    <p id="total-upcoming" class="text-3xl font-extrabold text-primary">--</p>
+            <!-- Loading Indicator -->
+            <div id="loading-indicator" class="flex justify-center items-center py-8">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Loading dashboard data...</span>
+            </div>
+
+            <!-- Quick Stats Grid -->
+            <div id="stats-grid" class="grid grid-cols-3 gap-3 mb-8 hidden">
+                <!-- Total Assignments Card -->
+                <div class="bg-card-light dark:bg-card-dark p-3 rounded-xl shadow-md text-center border-t-4 border-accent-blue">
+                    <p id="total-count" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Total</p>
                 </div>
-                <div class="bg-card-light dark:bg-slate-800 p-4 rounded-xl shadow-md border border-slate-100 dark:border-slate-700">
-                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Next Due Date</p>
-                    <p id="next-due" class="text-3xl font-extrabold text-slate-900 dark:text-white">--</p>
+                <!-- Completed Assignments Card -->
+                <div class="bg-card-light dark:bg-card-dark p-3 rounded-xl shadow-md text-center border-t-4 border-accent-green">
+                    <p id="completed-count" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Completed</p>
+                </div>
+                <!-- Upcoming Assignments Card -->
+                <div class="bg-card-light dark:bg-card-dark p-3 rounded-xl shadow-md text-center border-t-4 border-accent-red">
+                    <p id="upcoming-count" class="text-3xl font-extrabold text-slate-900 dark:text-white">0</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Upcoming</p>
                 </div>
             </div>
 
-            <div class="space-y-3">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Due Soon</h2>
-                <div id="upcoming-assignments-list" class="space-y-3">
-                    <p class="text-center text-slate-500 dark:text-slate-400 p-4">Loading assignments...</p>
+            <!-- Urgent Assignments List -->
+            <div id="urgent-section" class="space-y-4 hidden">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-accent-red">alarm</span>
+                    Your Top 5 Urgent Tasks
+                </h2>
+                <div id="urgent-assignments-container" class="space-y-3">
+                    <!-- Urgent Assignment Cards will be injected here -->
                 </div>
-                <a class="block text-center text-sm font-medium text-primary hover:text-blue-600 transition-colors pt-2" href="assignments.html">
-                    View All Assignments <span class="material-symbols-outlined text-base align-text-bottom">arrow_forward</span>
-                </a>
+                <p id="no-urgent-message" class="text-center text-slate-500 dark:text-slate-400 p-4 hidden">Great job! You have no urgent assignments due.</p>
+                <div class="pt-4 text-center">
+                    <a href="assignments.html" class="text-primary hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium">View All Assignments →</a>
+                </div>
             </div>
 
         </main>
 
+        <!-- Footer Navigation (Consistent with other pages) -->
         <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
             <nav class="flex justify-around p-2">
+                <!-- Dashboard Link (Active) -->
                 <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="dashboard.html">
                     <span class="material-symbols-outlined">home</span>
                     <span class="text-xs font-medium">Dashboard</span>
                 </a>
+                <!-- Assignments Link -->
                 <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="assignments.html">
                     <span class="material-symbols-outlined">list_alt</span>
                     <span class="text-xs font-medium">Assignments</span>
                 </a>
+                <!-- Calendar Link -->
                 <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="index.html">
                     <span class="material-symbols-outlined">calendar_month</span>
                     <span class="text-xs font-medium">Calendar</span>
                 </a>
+                <!-- Settings Link -->
                 <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="settings.html">
                     <span class="material-symbols-outlined">settings</span>
-                    <span class="text-xs font-medium">settings</span>
+                    <span class="text-xs font-medium">Settings</span>
                 </a>
             </nav>
         </footer>
     </div>
 
+    <!-- Firebase and Application Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -129,34 +163,39 @@
         let db;
         let auth;
         let isAuthReady = false;
-
-        // UI elements
-        const messageBox = document.getElementById('message-box');
-        const totalUpcoming = document.getElementById('total-upcoming');
-        const nextDue = document.getElementById('next-due');
-        const upcomingAssignmentsList = document.getElementById('upcoming-assignments-list');
         
+        // UI elements
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const messageBox = document.getElementById('message-box');
+        const statsGrid = document.getElementById('stats-grid');
+        const totalCount = document.getElementById('total-count');
+        const completedCount = document.getElementById('completed-count');
+        const upcomingCount = document.getElementById('upcoming-count');
+        const urgentSection = document.getElementById('urgent-section');
+        const urgentContainer = document.getElementById('urgent-assignments-container');
+        const noUrgentMessage = document.getElementById('no-urgent-message');
+
+        const PRIORITY_ORDER = { 'High': 3, 'Medium': 2, 'Low': 1 };
+        const PRIORITY_COLOR_MAP = {
+            'High': 'bg-red-500',
+            'Medium': 'bg-orange-500',
+            'Low': 'bg-slate-500',
+        };
+
+
         /**
          * Utility function to display messages.
          */
         function showMessage(message, type, duration = 3000) {
             let bgColor, textColor;
             switch (type) {
-                case 'success':
-                    bgColor = 'bg-green-100 dark:bg-green-900';
-                    textColor = 'text-green-700 dark:text-green-300';
-                    break;
                 case 'error':
                     bgColor = 'bg-red-100 dark:bg-red-900';
                     textColor = 'text-red-700 dark:text-red-300';
                     break;
-                case 'info':
+                default:
                     bgColor = 'bg-blue-100 dark:bg-blue-900';
                     textColor = 'text-blue-700 dark:text-blue-300';
-                    break;
-                default:
-                    bgColor = 'bg-gray-100 dark:bg-gray-700';
-                    textColor = 'text-gray-800 dark:text-gray-200';
             }
 
             messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
@@ -176,7 +215,8 @@
          */
         async function initializeFirebase() {
             if (!firebaseConfig) {
-                showMessage("Database connection failed. Configuration missing.", "error");
+                loadingIndicator.classList.add('hidden');
+                showMessage("Database connection failed. Configuration missing. Dashboard data cannot be loaded.", "error", 0);
                 return;
             }
 
@@ -192,13 +232,14 @@
                 }
 
                 isAuthReady = true;
-                console.log("Firebase initialized.");
+                console.log("Firebase initialized. Starting dashboard listener.");
 
                 startRealtimeAssignmentListener();
                 
             } catch (error) {
                 console.error("Firebase initialization or authentication error:", error);
-                showMessage("Authentication failed. Cannot load dashboard data.", "error");
+                loadingIndicator.classList.add('hidden');
+                showMessage("Authentication failed. Cannot load dashboard data.", "error", 0);
             }
         }
 
@@ -214,94 +255,115 @@
         }
         
         /**
-         * Sets up the real-time listener for assignments summary data.
+         * Sets up the real-time listener for all assignments.
          */
         function startRealtimeAssignmentListener() {
             const assignmentsCol = getAssignmentsCollection();
             if (!assignmentsCol) return;
 
-            // Query for all assignments to filter and summarize locally
             const q = query(assignmentsCol);
 
             onSnapshot(q, (snapshot) => {
-                const allAssignments = [];
+                loadingIndicator.classList.add('hidden');
+                const assignments = [];
                 snapshot.forEach(doc => {
-                    allAssignments.push({ id: doc.id, ...doc.data() });
+                    assignments.push({ id: doc.id, ...doc.data() });
                 });
                 
-                updateDashboardSummary(allAssignments);
+                processAndRenderDashboard(assignments);
 
             }, (error) => {
                 console.error("Error fetching assignments for dashboard:", error);
-                showMessage("Failed to load assignment summary.", "error");
+                showMessage("Failed to load dashboard data.", "error");
             });
         }
 
         /**
-         * Updates the summary cards and the upcoming list.
+         * Processes assignments to derive stats and the urgent list, then renders the UI.
          */
-        function updateDashboardSummary(assignments) {
-            // 1. Filter and sort upcoming assignments
-            const upcoming = assignments.filter(a => !a.isCompleted).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-            
-            // 2. Update Total Upcoming Tasks
-            totalUpcoming.textContent = upcoming.length;
+        function processAndRenderDashboard(assignments) {
+            let total = assignments.length;
+            let completed = 0;
+            let upcoming = 0;
+            let urgentTasks = [];
+            const now = new Date();
 
-            // 3. Update Next Due Date
-            if (upcoming.length > 0) {
-                const nextAssignment = upcoming[0];
-                const dueDate = new Date(nextAssignment.dueDate);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0); // Normalize today to midnight for comparison
-
-                const timeDiff = dueDate.getTime() - today.getTime();
-                const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-                
-                nextDue.classList.remove('text-red-500', 'text-orange-500', 'text-slate-900', 'dark:text-white');
-
-                if (daysUntil < 0) {
-                    nextDue.textContent = "Overdue!";
-                    nextDue.classList.add('text-red-500');
-                } else if (daysUntil === 0) {
-                    nextDue.textContent = "Today!";
-                    nextDue.classList.add('text-orange-500');
-                } else if (daysUntil === 1) {
-                    nextDue.textContent = "Tomorrow!";
-                    nextDue.classList.add('text-orange-500');
+            assignments.forEach(a => {
+                if (a.isCompleted) {
+                    completed++;
                 } else {
-                    nextDue.textContent = `${daysUntil} days`;
-                    nextDue.classList.add('text-slate-900', 'dark:text-white');
+                    upcoming++;
+                    
+                    // Only consider incomplete tasks for the urgent list
+                    const dueDate = new Date(a.dueDate);
+                    
+                    // Check if the assignment is overdue or due in the future
+                    if (dueDate >= now || dueDate < now) {
+                        urgentTasks.push(a);
+                    }
                 }
-            } else {
-                nextDue.textContent = "None!";
-                nextDue.classList.remove('text-red-500', 'text-orange-500');
-                nextDue.classList.add('text-slate-900', 'dark:text-white');
+            });
+
+            // 1. Calculate Stats
+            totalCount.textContent = total;
+            completedCount.textContent = completed;
+            upcomingCount.textContent = upcoming;
+            statsGrid.classList.remove('hidden');
+
+            // 2. Determine Urgent List (Top 5)
+            urgentTasks.sort((a, b) => {
+                // Primary sort: Priority (High > Medium > Low)
+                const priorityA = PRIORITY_ORDER[a.priority] || 1;
+                const priorityB = PRIORITY_ORDER[b.priority] || 1;
+                if (priorityB !== priorityA) {
+                    return priorityB - priorityA;
+                }
+
+                // Secondary sort: Due Date (Earliest first)
+                return new Date(a.dueDate) - new Date(b.dueDate);
+            });
+
+            // Take the top 5
+            renderUrgentList(urgentTasks.slice(0, 5));
+        }
+
+        /**
+         * Renders the urgent list to the UI.
+         */
+        function renderUrgentList(urgentTasks) {
+            urgentContainer.innerHTML = '';
+            urgentSection.classList.remove('hidden');
+            
+            if (urgentTasks.length === 0) {
+                noUrgentMessage.classList.remove('hidden');
+                urgentContainer.classList.add('hidden');
+                return;
             }
 
-            // 4. Render top 3 upcoming assignments
-            upcomingAssignmentsList.innerHTML = '';
-            const assignmentsToDisplay = upcoming.slice(0, 3);
-            
-            if (assignmentsToDisplay.length === 0) {
-                 upcomingAssignmentsList.innerHTML = '<p class="text-center text-slate-500 dark:text-slate-400 p-4">All caught up! Nothing due soon.</p>';
-            } else {
-                assignmentsToDisplay.forEach(a => {
-                    // Using toLocaleDateString() for a cleaner display format
-                    const dueDate = new Date(a.dueDate).toLocaleDateString();
-                    const card = document.createElement('a');
-                    card.href = `assignments.html?id=${a.id}`;
-                    card.className = "block bg-card-light dark:bg-slate-700 p-3 rounded-lg hover:shadow-lg transition-shadow border border-slate-200 dark:border-slate-600";
-                    card.innerHTML = `
-                        <div class="flex justify-between items-center">
-                            <p class="font-semibold text-slate-900 dark:text-white truncate">${a.title}</p>
-                            <span class="text-xs font-medium px-2 py-0.5 rounded-full text-white ${a.priority === 'High' ? 'bg-red-500' : (a.priority === 'Medium' ? 'bg-orange-500' : 'bg-slate-500')}">${a.priority || 'Low'}</span>
-                        </div>
-                        <p class="text-sm text-primary mt-1">${a.course}</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Due: ${dueDate}</p>
-                    `;
-                    upcomingAssignmentsList.appendChild(card);
+            noUrgentMessage.classList.add('hidden');
+            urgentContainer.classList.remove('hidden');
+
+            urgentTasks.forEach(a => {
+                const priorityClass = PRIORITY_COLOR_MAP[a.priority] || PRIORITY_COLOR_MAP['Low'];
+                const dueDate = new Date(a.dueDate).toLocaleDateString(undefined, {
+                    month: 'short', day: 'numeric'
                 });
-            }
+
+                const card = document.createElement('a');
+                card.href = `assignments.html?id=${a.id}`;
+                card.className = `block p-4 rounded-xl shadow-md transition-shadow border border-slate-200 dark:border-slate-700 bg-card-light dark:bg-card-dark hover:shadow-lg`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <p class="font-semibold text-slate-900 dark:text-white truncate">${a.title}</p>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full text-white ${priorityClass}">${a.priority || 'Low'}</span>
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                        <p class="text-sm text-primary">${a.course}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Due: ${dueDate}</p>
+                    </div>
+                `;
+                urgentContainer.appendChild(card);
+            });
         }
 
         // Initialize Firebase on load
@@ -309,4 +371,3 @@
     </script>
 </body>
 </html>
-```eof
