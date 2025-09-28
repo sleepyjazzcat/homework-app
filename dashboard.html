@@ -3,9 +3,11 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Student Dashboard</title>
-    <link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
-    <link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Lexend:wght@400;500;700;900&amp;family=Noto+Sans:wght@400;500;700;900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+    <title>Stitch Design</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script>
         // Tailwind Configuration for custom colors and fonts
@@ -17,9 +19,11 @@
                         "primary": "#137fec",
                         "background-light": "#f6f7f8",
                         "background-dark": "#101922",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1b2734",
                     },
                     fontFamily: {
-                        "display": ["Lexend", "Noto Sans"]
+                        "display": ["Lexend"]
                     },
                     borderRadius: {
                         "DEFAULT": "0.25rem",
@@ -32,104 +36,99 @@
         }
     </script>
     <style>
-        /* Ensures the body takes up at least the full viewport height */
         body {
             min-height: 100dvh;
         }
-        /* Custom scrollbar styling for better aesthetics */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #a0aec0; /* Tailwind gray-400 */
-            border-radius: 4px;
+        /* Style for the Google Classroom Icon */
+        #google-classroom-icon {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background-color: #e2e8f0; /* Tailwind gray-200 */
-        }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #4a5568; /* Tailwind gray-600 */
-        }
-        .dark .custom-scrollbar::-webkit-scrollbar-track {
-            background-color: #2d3748; /* Tailwind gray-800 */
-        }
+        .text-red-600 { color: #dc2626; } /* Tailwind Red-600 */
+        .text-orange-500 { color: #f97316; } /* Tailwind Orange-500 */
+        .text-slate-500 { color: #64748b; } /* Tailwind Slate-500 */
     </style>
 </head>
-<body class="font-display bg-background-light dark:bg-background-dark text-black dark:text-white">
-
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
     <div class="flex flex-col min-h-screen">
-        <!-- Header (Fixed at top) -->
-        <header class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm shadow-sm">
-            <div class="flex items-center p-4">
-                <h1 class="flex-1 text-xl font-bold text-center">Your Dashboard</h1>
-                <!-- Search/Notifications Icon placeholder -->
-                <button class="p-2 rounded-full hover:bg-primary/10 transition-colors">
+        <!-- Header -->
+        <header class="bg-background-light dark:bg-background-dark sticky top-0 z-10 shadow-sm border-b border-input-light dark:border-input-dark">
+            <div class="flex items-center justify-between p-4">
+                <div></div>
+                <h1 class="text-xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
+                <!-- Button to go to New Assignment Page -->
+                <a href="new_assignment.html" class="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">
                     <svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M224.9,214.65l-50.07-50.06a88.11,88.11,0,1,0-10.45,10.45l50.06,50.07a8,8,0,0,0,11.32-11.32ZM112,176a64,64,0,1,1,64-64A64.07,64.07,0,0,1,112,176Z"></path>
+                        <path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path>
                     </svg>
-                </button>
+                </a>
             </div>
         </header>
 
         <!-- Main Content Area -->
-        <main class="flex-1 p-4 space-y-6 overflow-y-auto custom-scrollbar">
+        <main class="flex-1 px-4 py-6 space-y-8 overflow-y-auto">
 
-            <!-- Welcome Card -->
-            <div class="bg-primary text-white p-6 rounded-xl shadow-lg">
-                <p class="text-sm font-medium opacity-80">Welcome back, Student!</p>
-                <h2 class="text-2xl font-extrabold mt-1">Ready for a productive week?</h2>
-                <div class="flex items-center justify-between mt-4">
-                    <p class="text-sm">3 Pending Assignments</p>
-                    <a href="index.html" class="bg-white text-primary text-sm font-semibold px-4 py-2 rounded-full hover:bg-gray-100 transition-colors">
-                        View Calendar
-                    </a>
+            <!-- Message Box for Feedback -->
+            <div id="message-box" class="hidden p-3 rounded-lg text-sm font-medium transition-opacity duration-300"></div>
+
+            <!-- Sync with Google Classroom Card (Now Functional) -->
+            <div class="bg-card-light dark:bg-slate-800 p-4 rounded-xl flex items-center gap-4 shadow-lg border border-slate-100 dark:border-slate-700">
+                <div class="w-12 h-12 flex-shrink-0">
+                    <!-- Placeholder for Google Classroom icon - using a custom SVG for aesthetics -->
+                    <div id="google-classroom-icon" class="w-full h-full rounded-full bg-red-600 flex items-center justify-center text-white">
+                        <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="#fff"/>
+                        </svg>
+                    </div>
                 </div>
+                <div class="flex-grow">
+                    <p class="font-bold text-slate-900 dark:text-white">Sync with Google Classroom</p>
+                    <p id="sync-status" class="text-sm text-slate-500 dark:text-slate-400">Tap to automatically import your assignments.</p>
+                </div>
+                <button id="sync-button" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap shadow-md hover:bg-primary/90 transition-colors disabled:bg-primary/50">
+                    Sync Now
+                </button>
             </div>
-
-            <!-- Upcoming Assignments Section -->
-            <section class="space-y-4">
-                <h3 class="text-lg font-bold">Upcoming Assignments</h3>
-
-                <!-- Assignment Card 1: NOW CLICKABLE -->
-                <a href="assignments.html" class="block bg-white dark:bg-slate-800 p-4 rounded-xl shadow-md border border-black/10 dark:border-white/10 hover:shadow-lg transition-shadow duration-200">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">High Priority</span>
-                        <p class="text-sm text-black/60 dark:text-white/60">Due Oct 26</p>
-                    </div>
-                    <h4 class="text-lg font-bold mt-2">Math Homework</h4>
-                    <p class="text-sm text-black/70 dark:text-white/70">Complete exercises 1-10 on page 45.</p>
-                </a>
-
-                <!-- Assignment Card 2 (Placeholder) -->
-                <a href="assignments.html" class="block bg-white dark:bg-slate-800 p-4 rounded-xl shadow-md border border-black/10 dark:border-white/10 hover:shadow-lg transition-shadow duration-200">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">Mid Priority</span>
-                        <p class="text-sm text-black/60 dark:text-white/60">Due Oct 28</p>
-                    </div>
-                    <h4 class="text-lg font-bold mt-2">Science Lab Report</h4>
-                    <p class="text-sm text-black/70 dark:text-white/70">Analyze the density experiment results.</p>
-                </a>
-            </section>
             
-            <!-- Quick Links Section (Placeholder) -->
-            <section class="space-y-4">
-                <h3 class="text-lg font-bold">Quick Access</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-md border border-black/10 dark:border-white/10">
-                        <p class="text-sm font-bold">Grade Book</p>
-                        <p class="text-2xl font-extrabold text-primary mt-1">A-</p>
+            <!-- Upcoming Assignments Section (Dynamically Populated) -->
+            <section>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Upcoming Assignments</h2>
+                    <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-base">person</span>
+                        <span id="user-id-display">Loading User...</span>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-md border border-black/10 dark:border-white/10">
-                        <p class="text-sm font-bold">Messages</p>
-                        <p class="text-2xl font-extrabold text-red-500 mt-1">2 New</p>
+                </div>
+                <div id="assignments-list" class="space-y-3">
+                    <!-- Assignments will be injected here by JavaScript -->
+                    <p id="loading-indicator" class="text-center text-slate-500 dark:text-slate-400">Loading assignments...</p>
+                </div>
+            </section>
+
+            <!-- Progress Section (Placeholder) -->
+            <section>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Progress</h2>
+                <div class="bg-card-light dark:bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="font-semibold text-slate-900 dark:text-white">Overall Progress</p>
+                        <p class="font-medium text-primary">60% (Mock)</p>
                     </div>
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5">
+                        <div class="bg-primary h-2.5 rounded-full" style="width: 60%"></div>
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">Keep up the great work!</p>
                 </div>
             </section>
         </main>
 
-        <!-- Footer Navigation (Sticky at bottom) -->
-        <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
+        <!-- Footer Navigation -->
+        <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
             <nav class="flex justify-around p-2">
                 <!-- Dashboard Link (Active) -->
                 <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="dashboard.html">
@@ -138,14 +137,14 @@
                     </svg>
                     <span class="text-xs font-medium">Dashboard</span>
                 </a>
-                <!-- Assignments Link (NOW correct path: assignments.html) -->
+                <!-- Assignments Link (Needs assignments.html file) -->
                 <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="assignments.html">
                     <svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M80,64a8,8,0,0,1,8-8H216a8,8,0,0,1,0,16H88A8,8,0,0,1,80,64Zm136,56H88a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Zm0,64H88a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16ZM44,52A12,12,0,1,0,56,64,12,12,0,0,0,44,52Zm0,64a12,12,0,1,0,12,12A12,12,0,0,0,44,116Zm0,64a12,12,0,1,0,12,12A12,12,0,0,0,44,180Z"></path>
                     </svg>
                     <span class="text-xs font-medium">Assignments</span>
                 </a>
-                <!-- Calendar Link (path: index.html) -->
+                <!-- Calendar Link (Needs index.html file) -->
                 <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="index.html">
                     <svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
                         <path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z"></path>
@@ -162,5 +161,370 @@
             </nav>
         </footer>
     </div>
+
+    <!-- Firebase and Application Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, query, where, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Set log level for debugging
+        setLogLevel('Debug');
+
+        const SYNC_API_MODEL = "gemini-2.5-flash-preview-05-20";
+        const apiKey = ""; 
+
+        // Global Firebase variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
+
+        // UI elements
+        const syncButton = document.getElementById('sync-button');
+        const syncStatus = document.getElementById('sync-status');
+        const assignmentsList = document.getElementById('assignments-list');
+        const messageBox = document.getElementById('message-box');
+        const userIdDisplay = document.getElementById('user-id-display');
+
+        /**
+         * Initializes Firebase and authenticates the user.
+         */
+        async function initializeFirebase() {
+            if (!firebaseConfig) {
+                console.error("Firebase configuration not found.");
+                showMessage("Database connection failed. Check console for details.", "error");
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                userId = auth.currentUser?.uid || crypto.randomUUID();
+                isAuthReady = true;
+                userIdDisplay.textContent = `User ID: ${userId.substring(0, 4)}...`;
+                console.log("Firebase initialized. User ID:", userId);
+
+                // Start listening for data immediately after auth is ready
+                startRealtimeAssignmentListener();
+
+            } catch (error) {
+                console.error("Firebase initialization or authentication error:", error);
+                showMessage("Authentication failed. Cannot load data.", "error");
+            }
+        }
+
+        /**
+         * Returns the Firestore collection path for public assignments.
+         */
+        function getAssignmentsCollection() {
+            if (!db || !isAuthReady) {
+                console.error("Firestore not ready.");
+                return null;
+            }
+            return collection(db, `artifacts/${appId}/public/data/assignments`);
+        }
+
+        /**
+         * Displays a temporary message to the user.
+         */
+        function showMessage(message, type, duration = 3000) {
+            let bgColor, textColor;
+            
+            switch (type) {
+                case 'success':
+                    bgColor = 'bg-green-100 dark:bg-green-900';
+                    textColor = 'text-green-700 dark:text-green-300';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-100 dark:bg-red-900';
+                    textColor = 'text-red-700 dark:text-red-300';
+                    break;
+                case 'loading':
+                    bgColor = 'bg-yellow-100 dark:bg-yellow-900';
+                    textColor = 'text-yellow-700 dark:text-yellow-300';
+                    break;
+                default:
+                    bgColor = 'bg-gray-100 dark:bg-gray-700';
+                    textColor = 'text-gray-800 dark:text-gray-200';
+            }
+
+            messageBox.className = `block ${bgColor} ${textColor} p-3 rounded-lg text-sm font-medium transition-opacity duration-300`;
+            messageBox.innerHTML = message;
+
+            if (type !== 'loading' && duration > 0) {
+                setTimeout(() => {
+                    messageBox.classList.add('opacity-0');
+                    setTimeout(() => messageBox.classList.remove('opacity-0', 'block'), 300);
+                }, duration);
+            } else if (type === 'loading') {
+                 messageBox.classList.remove('opacity-0');
+            }
+        }
+
+        /**
+         * Creates an HTML card for an assignment.
+         */
+        function createAssignmentCard(assignment) {
+            const dueDate = new Date(assignment.dueDate);
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            
+            let dueText = 'Due in ' + Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24)) + ' days';
+            let dueColor = 'text-slate-500 dark:text-slate-400';
+            
+            if (dueDate < today) {
+                dueText = 'Overdue';
+                dueColor = 'text-red-600 dark:text-red-500';
+            } else if (dueDate.toDateString() === today.toDateString()) {
+                dueText = 'Due Today';
+                dueColor = 'text-red-600 dark:text-red-500';
+            } else if (dueDate.toDateString() === tomorrow.toDateString()) {
+                dueText = 'Due Tomorrow';
+                dueColor = 'text-orange-500 dark:text-orange-400';
+            } else if (assignment.priority === 'High') {
+                dueColor = 'text-red-600 dark:text-red-500';
+            } else if (assignment.priority === 'Medium') {
+                dueColor = 'text-orange-500 dark:text-orange-400';
+            }
+            
+            const card = document.createElement('a');
+            card.href = `assignments.html?id=${assignment.id}`; // Link to assignment details
+            card.className = "block bg-card-light dark:bg-slate-800 p-4 rounded-xl shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow";
+            card.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <div class="flex flex-col">
+                        <p class="font-semibold text-slate-900 dark:text-white">${assignment.title}</p>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">${assignment.course}</p>
+                    </div>
+                    <div class="text-right flex-shrink-0 ml-4">
+                        <p class="font-medium ${dueColor}">${dueText}</p>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">${assignment.description}</p>
+            `;
+            return card;
+        }
+
+        /**
+         * Renders the assignments fetched from Firestore.
+         */
+        function renderAssignments(assignments) {
+            assignmentsList.innerHTML = ''; // Clear previous list
+            if (assignments.length === 0) {
+                assignmentsList.innerHTML = '<p class="text-center text-slate-500 dark:text-slate-400 p-4">You have no upcoming assignments. Sync your classroom or add one manually!</p>';
+            } else {
+                assignments
+                    // Sort by date (oldest first)
+                    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+                    // Filter out assignments that are 7 days past due
+                    .filter(a => (new Date(a.dueDate) > new Date(new Date().setDate(new Date().getDate() - 7))))
+                    .forEach(assignment => {
+                        assignmentsList.appendChild(createAssignmentCard(assignment));
+                    });
+            }
+        }
+
+        /**
+         * Sets up the real-time listener for assignments.
+         */
+        function startRealtimeAssignmentListener() {
+            const assignmentsCol = getAssignmentsCollection();
+            if (!assignmentsCol) return;
+
+            // Simple query without orderBy to avoid index creation issues
+            const q = query(assignmentsCol);
+
+            onSnapshot(q, (snapshot) => {
+                const assignments = [];
+                snapshot.forEach(doc => {
+                    assignments.push({ id: doc.id, ...doc.data() });
+                });
+                renderAssignments(assignments);
+            }, (error) => {
+                console.error("Error fetching assignments:", error);
+                assignmentsList.innerHTML = `<p class="text-center text-red-500">Failed to load assignments: ${error.message}</p>`;
+            });
+        }
+
+
+        /**
+         * Saves a single assignment object to Firestore.
+         */
+        async function saveAssignment(assignmentData) {
+            const assignmentsCol = getAssignmentsCollection();
+            if (!assignmentsCol) return;
+
+            try {
+                const dataToSave = {
+                    ...assignmentData,
+                    dueDate: assignmentData.dueDate ? String(assignmentData.dueDate) : '',
+                    createdAt: new Date().toISOString(),
+                    userId: userId 
+                };
+                
+                await addDoc(assignmentsCol, dataToSave);
+                return true;
+            } catch (error) {
+                console.error("Error saving assignment to Firestore:", error);
+                showMessage(`Failed to save assignment: ${assignmentData.title}`, "error");
+                return false;
+            }
+        }
+
+        /**
+         * Simulates fetching assignments from Google Classroom using the LLM API.
+         */
+        async function fetchMockAssignments() {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${SYNC_API_MODEL}:generateContent?key=${apiKey}`;
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            const tenDaysFromNow = new Date(today);
+            tenDaysFromNow.setDate(today.getDate() + 10);
+
+            const formatDate = (date) => date.toISOString().split('T')[0];
+
+            const systemPrompt = `You are a Google Classroom API simulator. Generate 3 unique mock student assignments, focusing on core subjects (Mathematics, Science, English, History). Assign due dates between ${formatDate(tomorrow)} and ${formatDate(tenDaysFromNow)}. Assign a priority of High, Medium, or Low. The output MUST be a JSON array matching the provided schema.`;
+            const userQuery = "Generate a list of 3 assignments for a high school student that were just synced from a learning management system.";
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                "title": { "type": "STRING" },
+                                "course": { "type": "STRING" },
+                                "dueDate": { "type": "STRING", "description": "The due date in YYYY-MM-DD format." },
+                                "description": { "type": "STRING" },
+                                "priority": { "type": "STRING" }
+                            },
+                            "propertyOrdering": ["title", "course", "dueDate", "description", "priority"]
+                        }
+                    }
+                }
+            };
+            
+            let response = null;
+            let retries = 0;
+            const maxRetries = 5;
+            
+            while (retries < maxRetries) {
+                try {
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        break;
+                    } else if (response.status === 429 && retries < maxRetries - 1) {
+                        retries++;
+                        const delay = Math.pow(2, retries) * 1000;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    } else {
+                        throw new Error(`API returned status code ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    throw new Error("Failed to connect to the Gemini API.");
+                }
+            }
+            
+            if (!response || !response.ok) {
+                throw new Error("API call failed after max retries.");
+            }
+
+            const result = await response.json();
+            const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (!jsonText) {
+                throw new Error("LLM response missing content.");
+            }
+
+            try {
+                const assignments = JSON.parse(jsonText);
+                if (!Array.isArray(assignments)) {
+                     throw new Error("LLM response did not return a JSON array.");
+                }
+                return assignments;
+            } catch (e) {
+                console.error("JSON Parsing Error:", e, "Raw Text:", jsonText);
+                throw new Error("LLM returned malformed JSON.");
+            }
+        }
+
+
+        /**
+         * Event handler for the Google Sync button.
+         */
+        syncButton.addEventListener('click', async () => {
+            if (!isAuthReady) {
+                showMessage("Database not ready. Please wait.", "error");
+                return;
+            }
+
+            // Disable buttons and show loading state
+            syncButton.disabled = true;
+            syncButton.innerHTML = `<span class="material-symbols-outlined animate-spin">progress_activity</span> Syncing...`;
+            syncStatus.textContent = "Connecting to Google Classroom...";
+            showMessage("Connecting to Google Classroom...", "loading", 0);
+
+            try {
+                const mockAssignments = await fetchMockAssignments();
+                
+                let savedCount = 0;
+                for (const assignment of mockAssignments) {
+                    const success = await saveAssignment({
+                        ...assignment,
+                        isSynced: true,
+                    });
+                    if (success) savedCount++;
+                }
+
+                if (savedCount > 0) {
+                    showMessage(`Successfully synced and added ${savedCount} new assignments!`, "success");
+                    syncStatus.textContent = `Synced ${savedCount} new assignments!`;
+                } else {
+                    showMessage("Sync complete, but no new assignments were found.", "error");
+                    syncStatus.textContent = "Sync complete. No new assignments found.";
+                }
+                
+
+            } catch (error) {
+                console.error("Google Sync Failed:", error);
+                showMessage(`Sync failed: ${error.message}`, "error");
+                syncStatus.textContent = "Sync failed. Try again.";
+            } finally {
+                // Re-enable buttons and restore original text
+                syncButton.disabled = false;
+                syncButton.innerHTML = `Sync Now`;
+            }
+        });
+
+
+        // Initialize Firebase on load
+        initializeFirebase();
+    </script>
 </body>
 </html>
