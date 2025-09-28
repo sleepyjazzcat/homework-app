@@ -216,7 +216,15 @@
         async function initializeFirebase() {
             if (!firebaseConfig) {
                 loadingIndicator.classList.add('hidden');
-                showMessage("Database connection failed. Configuration missing. Dashboard data cannot be loaded.", "error", 0);
+                totalCount.textContent = 'N/A';
+                completedCount.textContent = 'N/A';
+                upcomingCount.textContent = 'N/A';
+                statsGrid.classList.remove('hidden');
+
+                urgentContainer.innerHTML = '<p class="text-center text-red-500 dark:text-red-400 p-4">Database connection failed. Configuration missing. Dashboard data cannot be loaded.</p>';
+                urgentSection.classList.remove('hidden');
+
+                // Don't call showMessage here to keep the persistent error in the urgentContainer.
                 return;
             }
 
@@ -286,7 +294,10 @@
             let completed = 0;
             let upcoming = 0;
             let urgentTasks = [];
+            
+            // Get today's date normalized to midnight
             const now = new Date();
+            now.setHours(0, 0, 0, 0); 
 
             assignments.forEach(a => {
                 if (a.isCompleted) {
@@ -297,7 +308,7 @@
                     // Only consider incomplete tasks for the urgent list
                     const dueDate = new Date(a.dueDate);
                     
-                    // Check if the assignment is overdue or due in the future
+                    // Tasks that are due today, overdue, or due in the future are 'upcoming'
                     if (dueDate >= now || dueDate < now) {
                         urgentTasks.push(a);
                     }
