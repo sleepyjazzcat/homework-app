@@ -6,9 +6,9 @@
     <title>Academic Calendar</title>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     <script>
         // Tailwind Configuration
         tailwind.config = {
@@ -22,11 +22,11 @@
                         "card-light": "#ffffff",
                         "card-dark": "#1b2734",
                         "accent-red": "#ef4444",
-                        "accent-orange": "#f97316",
-                        "accent-slate": "#64748b",
+                        "accent-green": "#10b981",
+                        "accent-blue": "#3b82f6",
                     },
                     fontFamily: {
-                        "display": ["Lexend"]
+                        "display": ["Lexend", "sans-serif"]
                     },
                     borderRadius: {
                         "DEFAULT": "0.25rem",
@@ -49,111 +49,122 @@
             'GRAD' 0,
             'opsz' 24
         }
-        /* Custom calendar cell styling */
-        .calendar-cell {
-            aspect-ratio: 1/1;
+        /* Style for the calendar days grid */
+        #calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: theme('colors.slate.300'); /* Separator color */
+            border: 1px solid theme('colors.slate.300');
+            border-radius: theme('borderRadius.lg');
+            overflow: hidden;
+        }
+        .day-label {
+            @apply text-center text-xs font-semibold py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300;
+        }
+        .calendar-day {
+            @apply relative min-h-[100px] p-2 text-sm bg-card-light dark:bg-card-dark transition-all duration-100 hover:shadow-inner cursor-pointer;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding-top: 4px;
-            cursor: pointer;
-            transition: all 0.15s;
+            align-items: flex-start;
         }
-        .calendar-cell:hover:not(.disabled) {
-            background-color: rgba(19, 127, 236, 0.1);
+        .calendar-day.inactive {
+            @apply bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-default;
         }
-        .calendar-cell.selected {
-            background-color: #137fec !important;
-            color: white !important;
-            border-radius: 0.5rem;
-        }
-        .calendar-cell.selected .day-number, .calendar-cell.selected .dot {
-            color: white !important;
+        .current-day-number {
+            @apply font-bold bg-primary text-white h-6 w-6 rounded-full flex items-center justify-center -translate-x-1;
         }
         .day-number {
-            font-size: 0.875rem; /* sm */
-            font-weight: 500; /* medium */
+            @apply font-medium text-slate-800 dark:text-slate-200 h-6 w-6 flex items-center justify-center -translate-x-1;
         }
-        .calendar-cell.disabled {
-            opacity: 0.4;
-            pointer-events: none;
+        .event-marker {
+            @apply text-white text-[10px] px-1.5 py-[1px] rounded-full mt-1 font-medium truncate w-full;
         }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
-    <div class="flex flex-col min-h-screen">
-        <!-- Header -->
-        <header class="bg-card-light dark:bg-card-dark sticky top-0 z-10 shadow-md border-b border-slate-200 dark:border-slate-700">
-            <div class="p-4 flex items-center justify-center">
-                <h1 class="text-xl font-bold text-slate-900 dark:text-white">Academic Calendar</h1>
-            </div>
-        </header>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 flex flex-col min-h-screen">
 
-        <!-- Message Box for Feedback -->
-        <div id="message-box" class="hidden mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300"></div>
-
-        <!-- Main Content Area -->
-        <main class="flex-1 px-4 py-4 overflow-y-auto">
-            <!-- Calendar Navigation -->
-            <div class="flex items-center justify-between mb-4">
-                <button id="prev-month" class="p-2 text-primary hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition-colors">
-                    <span class="material-symbols-outlined">chevron_left</span>
-                </button>
-                <h2 id="current-month-year" class="text-xl font-bold text-slate-900 dark:text-white"></h2>
-                <button id="next-month" class="p-2 text-primary hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition-colors">
-                    <span class="material-symbols-outlined">chevron_right</span>
+    <!-- Assignment Details Modal (Hidden by default) -->
+    <div id="event-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+        <div class="bg-card-light dark:bg-card-dark rounded-xl p-6 shadow-2xl w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-xl font-bold">Assignments Due</h3>
+                <button id="close-modal" class="text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-
-            <!-- Calendar Grid -->
-            <div class="bg-card-light dark:bg-card-dark p-3 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700">
-                <!-- Weekday Headers -->
-                <div class="grid grid-cols-7 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
-                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-                </div>
-                <!-- Calendar Days -->
-                <div id="calendar-grid" class="grid grid-cols-7 gap-1">
-                    <!-- Days will be injected here -->
-                </div>
+            <div id="modal-date" class="text-sm text-primary mb-4 font-medium"></div>
+            <div id="modal-events-list" class="space-y-3 max-h-80 overflow-y-auto">
+                <!-- Event cards go here -->
             </div>
-
-            <!-- Daily Assignment List -->
-            <div class="mt-6">
-                <h3 id="daily-list-header" class="text-xl font-bold mb-3">Assignments for Selected Date</h3>
-                <div id="daily-assignment-list" class="space-y-3">
-                    <p class="text-slate-500 dark:text-slate-400">Select a date to view assignments.</p>
-                </div>
-            </div>
-
-        </main>
-
-        <!-- Footer Navigation (Consistent with other pages) -->
-        <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
-            <nav class="flex justify-around p-2">
-                <!-- Dashboard Link -->
-                <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="dashboard.html">
-                    <span class="material-symbols-outlined">home</span>
-                    <span class="text-xs font-medium">Dashboard</span>
-                </a>
-                <!-- Assignments Link -->
-                <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="assignments.html">
-                    <span class="material-symbols-outlined">list_alt</span>
-                    <span class="text-xs font-medium">Assignments</span>
-                </a>
-                <!-- Calendar Link (Active) -->
-                <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="index.html">
-                    <span class="material-symbols-outlined">calendar_month</span>
-                    <span class="text-xs font-medium">Calendar</span>
-                </a>
-                <!-- Settings Link -->
-                <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="settings.html">
-                    <span class="material-symbols-outlined">settings</span>
-                    <span class="text-xs font-medium">Settings</span>
-                </a>
-            </nav>
-        </footer>
+            <p id="no-events-message" class="text-center text-slate-500 dark:text-slate-400 py-4 hidden">No assignments due on this date.</p>
+        </div>
     </div>
+
+    <!-- Header -->
+    <header class="bg-card-light dark:bg-card-dark sticky top-0 z-10 shadow-md border-b border-slate-200 dark:border-slate-700">
+        <div class="p-4 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white">Academic Calendar</h1>
+            <a href="add-assignments.html" class="p-2 text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors">
+                <span class="material-symbols-outlined text-2xl">add_circle</span>
+            </a>
+        </div>
+        <!-- Calendar Controls -->
+        <div class="flex justify-between items-center p-3 border-t border-slate-200 dark:border-slate-700">
+            <button id="prev-month" class="p-2 text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <h2 id="current-month" class="text-lg font-bold">Loading...</h2>
+            <button id="next-month" class="p-2 text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Message Box for Feedback -->
+    <div id="message-box" class="mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 hidden"></div>
+
+    <!-- Main Content: Calendar Grid -->
+    <main class="flex-1 p-4 overflow-y-auto space-y-4">
+        <div id="calendar-wrapper" class="rounded-xl shadow-xl">
+            <!-- Day Labels -->
+            <div class="grid grid-cols-7 gap-1">
+                <div class="day-label">SUN</div>
+                <div class="day-label">MON</div>
+                <div class="day-label">TUE</div>
+                <div class="day-label">WED</div>
+                <div class="day-label">THU</div>
+                <div class="day-label">FRI</div>
+                <div class="day-label">SAT</div>
+            </div>
+            <!-- Calendar Grid -->
+            <div id="calendar-grid">
+                <!-- Days will be rendered here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Navigation (Consistent with other pages) -->
+    <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
+        <nav class="flex justify-around p-2">
+            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="dashboard.html">
+                <span class="material-symbols-outlined">home</span>
+                <span class="text-xs font-medium">Dashboard</span>
+            </a>
+            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="assignments.html">
+                <span class="material-symbols-outlined">list_alt</span>
+                <span class="text-xs font-medium">Assignments</span>
+            </a>
+            <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="index.html">
+                <span class="material-symbols-outlined">calendar_month</span>
+                <span class="text-xs font-medium">Calendar</span>
+            </a>
+            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="settings.html">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="text-xs font-medium">Settings</span>
+            </a>
+        </nav>
+    </footer>
 
     <!-- Firebase and Application Logic -->
     <script type="module">
@@ -161,54 +172,61 @@
         import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, query, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Set log level for debugging
         setLogLevel('Debug');
 
-        // Global Firebase variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        let db;
-        let auth;
+        let db = null;
         let isAuthReady = false;
-        
-        let currentDate = new Date();
-        let selectedDate = new Date(); // Tracks the date the user has clicked
-        let assignmentMap = {}; // Maps date string (YYYY-MM-DD) to a list of assignments and highest priority
+        let isLocalMode = false;
+        const LOCAL_STORAGE_KEY = `academicPlanner_assignments_${appId}`;
+        let currentAssignments = [];
+        let displayDate = new Date(); // Date currently displayed by the calendar
 
         // UI elements
-        const messageBox = document.getElementById('message-box');
-        const currentMonthYearHeader = document.getElementById('current-month-year');
         const calendarGrid = document.getElementById('calendar-grid');
+        const currentMonthDisplay = document.getElementById('current-month');
         const prevMonthButton = document.getElementById('prev-month');
         const nextMonthButton = document.getElementById('next-month');
-        const dailyListHeader = document.getElementById('daily-list-header');
-        const dailyAssignmentList = document.getElementById('daily-assignment-list');
+        const eventModal = document.getElementById('event-modal');
+        const closeModalButton = document.getElementById('close-modal');
+        const modalDate = document.getElementById('modal-date');
+        const modalEventsList = document.getElementById('modal-events-list');
+        const noEventsMessage = document.getElementById('no-events-message');
 
-        const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        // Constants
         const PRIORITY_COLOR_MAP = {
-            'High': 'bg-accent-red',
-            'Medium': 'bg-accent-orange',
-            'Low': 'bg-accent-slate',
-            'bg-accent-red': 'High', // Reverse mapping for lookup
-            'bg-accent-orange': 'Medium',
-            'bg-accent-slate': 'Low',
+            'High': 'bg-red-500',
+            'Medium': 'bg-orange-500',
+            'Low': 'bg-slate-500',
         };
+        const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 
         /**
-         * Utility function to display messages.
+         * Utility function to display messages. (Reused from previous files)
          */
         function showMessage(message, type, duration = 3000) {
+            const messageBox = document.getElementById('message-box');
             let bgColor, textColor;
             switch (type) {
+                case 'success':
+                    bgColor = 'bg-green-100 dark:bg-green-900';
+                    textColor = 'text-green-700 dark:text-green-300';
+                    break;
                 case 'error':
                     bgColor = 'bg-red-100 dark:bg-red-900';
                     textColor = 'text-red-700 dark:text-red-300';
                     break;
-                default:
+                case 'info':
                     bgColor = 'bg-blue-100 dark:bg-blue-900';
                     textColor = 'text-blue-700 dark:text-blue-300';
+                    break;
+                default:
+                    bgColor = 'bg-gray-100 dark:bg-gray-700';
+                    textColor = 'text-gray-800 dark:text-gray-200';
             }
 
             messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
@@ -223,263 +241,387 @@
             }
         }
 
+        /* --- LOCAL STORAGE FUNCTIONS --- */
+
         /**
-         * Initializes Firebase and authenticates the user.
+         * Reads all assignments from local storage.
+         */
+        function getAssignmentsFromLocal() {
+            try {
+                const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+                return data ? JSON.parse(data) : [];
+            } catch (error) {
+                console.error("Error reading from local storage:", error);
+                return [];
+            }
+        }
+        
+        /**
+         * Saves the entire assignments array back to local storage.
+         */
+        function saveAssignmentsToLocal(assignments) {
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(assignments));
+            } catch (error) {
+                console.error("Error writing to local storage:", error);
+                showMessage("Warning: Failed to save changes locally.", "error");
+            }
+        }
+
+        /**
+         * Local Mode Realtime Listener (simple manual refresh)
+         */
+        function startLocalModeListener() {
+            currentAssignments = getAssignmentsFromLocal();
+            renderCalendar();
+        }
+
+        /* --- FIREBASE FUNCTIONS --- */
+
+        /**
+         * Sets up the real-time listener for Firestore assignments.
+         */
+        function startFirestoreListener() {
+            const assignmentsCol = collection(db, `artifacts/${appId}/public/data/assignments`);
+
+            onSnapshot(assignmentsCol, (snapshot) => {
+                currentAssignments = [];
+                snapshot.forEach(doc => {
+                    currentAssignments.push({ id: doc.id, ...doc.data() });
+                });
+                renderCalendar();
+            }, (error) => {
+                console.error("Firestore snapshot error:", error);
+                showMessage("Error loading data from database.", "error");
+            });
+        }
+        
+        /**
+         * Toggles completion status in Firestore Mode.
+         */
+        async function toggleCompletionFirestore(assignmentId, newStatus) {
+            try {
+                const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                const assignmentRef = doc(db, `artifacts/${appId}/public/data/assignments`, assignmentId);
+                await updateDoc(assignmentRef, { isCompleted: newStatus });
+                showMessage(`Assignment marked as ${newStatus ? 'Complete' : 'Incomplete'} (DB update).`, 'success');
+            } catch (error) {
+                console.error("Firestore update error:", error);
+                showMessage("Failed to update assignment status.", "error");
+            }
+        }
+
+        /* --- CALENDAR RENDERING LOGIC --- */
+
+        /**
+         * Renders the calendar grid for the currently displayed month.
+         */
+        function renderCalendar() {
+            calendarGrid.innerHTML = '';
+            
+            const year = displayDate.getFullYear();
+            const month = displayDate.getMonth();
+            
+            // Set the month header
+            currentMonthDisplay.textContent = displayDate.toLocaleDateString(undefined, { year: 'numeric', month: 'long' });
+
+            // 1. Get first day of the month (0 = Sun, 6 = Sat)
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+
+            // 2. Get number of days in the month
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // 3. Get today's date for highlighting
+            const today = new Date();
+            const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
+            // 4. Map assignments to dates for quick lookup
+            const assignmentsByDate = groupAssignmentsByDate(currentAssignments);
+            
+            let dayCount = 1;
+            let totalDaysRendered = 0;
+
+            // Helper function to get the number of days in the previous month
+            const daysInPreviousMonth = new Date(year, month, 0).getDate();
+            
+            // Helper to format date key for lookup
+            const getFormattedDateKey = (year, month, day) => {
+                // Ensure month and day are padded with leading zero
+                const m = String(month + 1).padStart(2, '0');
+                const d = String(day).padStart(2, '0');
+                return `${year}-${m}-${d}`;
+            };
+
+
+            // RENDER DAYS
+            
+            // Loop for weeks (max 6 weeks)
+            for (let i = 0; i < 6; i++) {
+                // Loop for 7 days in a week
+                for (let j = 0; j < 7; j++) {
+                    totalDaysRendered++;
+                    
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'calendar-day';
+
+                    let dayNumber, dateKey;
+                    let isInactive = false;
+                    let isToday = false;
+                    
+                    if (totalDaysRendered <= firstDayOfMonth) {
+                        // Previous month's days (Inactive)
+                        dayNumber = daysInPreviousMonth - firstDayOfMonth + totalDaysRendered;
+                        isInactive = true;
+                        dayElement.classList.add('inactive');
+                        
+                        // Set the dateKey to the actual day in the previous month (for visual continuity)
+                        const prevMonth = month === 0 ? 11 : month - 1;
+                        const prevYear = month === 0 ? year - 1 : year;
+                        dateKey = getFormattedDateKey(prevYear, prevMonth, dayNumber);
+                        
+                    } else if (dayCount <= daysInMonth) {
+                        // Current month's days (Active)
+                        dayNumber = dayCount;
+                        dateKey = getFormattedDateKey(year, month, dayNumber);
+                        
+                        // Check if it is today
+                        if (isCurrentMonth && dayNumber === today.getDate()) {
+                            isToday = true;
+                        }
+
+                        // Attach event listener for modal
+                        dayElement.onclick = () => openEventModal(dateKey);
+                        
+                        dayCount++;
+                        
+                    } else {
+                        // Next month's days (Inactive)
+                        dayNumber = dayCount - daysInMonth;
+                        isInactive = true;
+                        dayElement.classList.add('inactive');
+                        
+                        // Set the dateKey to the actual day in the next month
+                        const nextMonth = month === 11 ? 0 : month + 1;
+                        const nextYear = month === 11 ? year + 1 : year;
+                        dateKey = getFormattedDateKey(nextYear, nextMonth, dayNumber);
+
+                        dayCount++;
+
+                        // Stop if we have passed the 6th row and are on the first day of the next month
+                        if (i >= 5 && j === 0) break;
+                    }
+
+                    // Render Day Number
+                    const numberSpan = document.createElement('span');
+                    numberSpan.className = isToday ? 'current-day-number' : 'day-number';
+                    numberSpan.textContent = dayNumber;
+                    dayElement.appendChild(numberSpan);
+
+                    // Render Events
+                    const events = assignmentsByDate[dateKey] || [];
+                    
+                    // Filter out completed for visualization, but show them in the modal
+                    const visibleEvents = events.filter(e => !e.isCompleted);
+
+                    // Sort events by priority (High first)
+                    visibleEvents.sort((a, b) => {
+                        return (b.priority === 'High' ? 3 : b.priority === 'Medium' ? 2 : 1) - 
+                               (a.priority === 'High' ? 3 : a.priority === 'Medium' ? 2 : 1);
+                    });
+
+                    // Only show up to 3 events directly on the calendar cell
+                    visibleEvents.slice(0, 3).forEach(event => {
+                        const marker = document.createElement('div');
+                        const priorityClass = (PRIORITY_COLOR_MAP[event.priority] || 'bg-slate-500');
+                        marker.className = `event-marker ${priorityClass}`;
+                        marker.textContent = `${event.course}: ${event.title}`;
+                        dayElement.appendChild(marker);
+                    });
+
+                    // If there are more events, add a summary marker
+                    if (visibleEvents.length > 3) {
+                        const marker = document.createElement('div');
+                        marker.className = 'event-marker bg-slate-400 dark:bg-slate-500';
+                        marker.textContent = `+${visibleEvents.length - 3} more...`;
+                        dayElement.appendChild(marker);
+                    }
+                    
+                    calendarGrid.appendChild(dayElement);
+                    
+                    // Break outer loop if all days (including filler days) have been rendered or we passed the days of the current month
+                    if (dayCount > daysInMonth && j === 6) break; 
+                }
+                if (dayCount > daysInMonth) break;
+            }
+        }
+        
+        /**
+         * Groups assignments by their due date for easy calendar mapping.
+         * Returns an object where keys are YYYY-MM-DD strings.
+         */
+        function groupAssignmentsByDate(assignments) {
+            const grouped = {};
+            assignments.forEach(a => {
+                const datePart = a.dueDate; // YYYY-MM-DD format
+                if (!grouped[datePart]) {
+                    grouped[datePart] = [];
+                }
+                grouped[datePart].push(a);
+            });
+            return grouped;
+        }
+
+        /* --- MODAL LOGIC --- */
+
+        /**
+         * Opens the modal to show assignments for a specific date.
+         */
+        function openEventModal(dateKey) {
+            const assignmentsByDate = groupAssignmentsByDate(currentAssignments);
+            let events = assignmentsByDate[dateKey] || [];
+            
+            // Sort modal events: Incomplete first, then by priority
+            events.sort((a, b) => {
+                if (a.isCompleted !== b.isCompleted) return a.isCompleted ? 1 : -1;
+                return (b.priority === 'High' ? 3 : b.priority === 'Medium' ? 2 : 1) - 
+                       (a.priority === 'High' ? 3 : a.priority === 'Medium' ? 2 : 1);
+            });
+
+            // Parse date for display
+            const [year, month, day] = dateKey.split('-').map(Number);
+            // JavaScript months are 0-indexed, so we use month-1
+            const date = new Date(year, month - 1, day); 
+
+            modalDate.textContent = date.toLocaleDateString(undefined, {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            modalEventsList.innerHTML = '';
+
+            if (events.length > 0) {
+                noEventsMessage.classList.add('hidden');
+                events.forEach(event => modalEventsList.appendChild(createEventCard(event)));
+            } else {
+                noEventsMessage.classList.remove('hidden');
+            }
+
+            // Store the date key currently displayed in the modal
+            eventModal.dataset.dateKey = dateKey; 
+
+            eventModal.classList.remove('hidden');
+            eventModal.classList.add('flex');
+        }
+
+        /**
+         * Creates an event card for the modal list.
+         */
+        function createEventCard(event) {
+            const card = document.createElement('div');
+            const priorityClass = event.isCompleted ? 'bg-slate-400' : (PRIORITY_COLOR_MAP[event.priority] || 'bg-slate-500');
+
+            card.className = "p-3 bg-slate-100 dark:bg-slate-700 rounded-lg shadow-sm border border-slate-200 dark:border-slate-600";
+            card.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <p class="text-base font-semibold ${event.isCompleted ? 'line-through text-slate-500 dark:text-slate-400' : 'text-slate-900 dark:text-white'}">${event.title}</p>
+                    <span class="text-xs font-medium px-2 py-0.5 rounded-full text-white ${priorityClass}">${event.priority || 'Low'}</span>
+                </div>
+                <p class="text-sm text-primary mt-0.5">${event.course}</p>
+                <div class="flex items-center space-x-2 mt-2">
+                    <input type="checkbox" id="modal-checkbox-${event.id}" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary bg-input-light dark:bg-input-dark" ${event.isCompleted ? 'checked' : ''} onclick="window.toggleAssignmentCompletion('${event.id}', event.target.checked); event.stopPropagation();">
+                    <label for="modal-checkbox-${event.id}" class="text-xs text-slate-600 dark:text-slate-300">Mark as ${event.isCompleted ? 'Incomplete' : 'Complete'}</label>
+                </div>
+            `;
+            return card;
+        }
+
+        /**
+         * Handles the click on the checkbox in the modal for both local and firestore.
+         */
+        window.toggleAssignmentCompletion = function(assignmentId, newStatus) {
+            const dateKey = eventModal.dataset.dateKey; // Get the currently displayed date key
+
+            if (isLocalMode) {
+                const index = currentAssignments.findIndex(a => a.id === assignmentId);
+                if (index > -1) {
+                    currentAssignments[index].isCompleted = newStatus;
+                    saveAssignmentsToLocal(currentAssignments);
+                    showMessage(`Assignment status updated (Local).`, 'success');
+                }
+                // Re-render and re-open modal to reflect change immediately
+                renderCalendar();
+                openEventModal(dateKey);
+
+            } else {
+                toggleCompletionFirestore(assignmentId, newStatus);
+                // Firestore listener handles the re-render of calendar, but we need to force modal update
+                // Delaying to wait for snapshot update is best, but for responsiveness, we just re-open the modal
+                setTimeout(() => openEventModal(dateKey), 200); 
+            }
+        }
+        
+        // Modal close listener
+        closeModalButton.onclick = () => {
+            eventModal.classList.add('hidden');
+            eventModal.classList.remove('flex');
+        };
+
+        /* --- NAVIGATION AND INITIALIZATION --- */
+
+        /**
+         * Changes the month displayed by the calendar.
+         */
+        function changeMonth(direction) {
+            displayDate.setMonth(displayDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        prevMonthButton.onclick = () => changeMonth(-1);
+        nextMonthButton.onclick = () => changeMonth(1);
+
+        /**
+         * Initializes Firebase or falls back to Local Mode.
          */
         async function initializeFirebase() {
             if (!firebaseConfig) {
-                showMessage("Database connection failed. Configuration missing. Calendar data cannot be loaded.", "error", 0);
-                return;
-            }
+                isLocalMode = true;
+                console.warn("Firebase configuration missing. Switching to Local Mode.");
+                startLocalModeListener();
+                showMessage("Database connection missing. Data loaded from your browser's Local Storage.", "info", 5000);
+            } else {
+                try {
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    const auth = getAuth(app);
+                    
+                    // Authenticate
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
 
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
+                    isAuthReady = true;
+                    console.log("Firebase initialized and ready. Starting Firestore listener.");
+                    startFirestoreListener();
+                    
+                } catch (error) {
+                    console.error("Firebase initialization failed, falling back to Local Mode:", error);
+                    isLocalMode = true;
+                    isAuthReady = true;
+                    startLocalModeListener();
+                    showMessage("Database connection failed. Data loaded from Local Storage.", "info", 5000);
                 }
-
-                isAuthReady = true;
-                console.log("Firebase initialized. Starting calendar listener.");
-
-                startRealtimeAssignmentListener();
-                
-            } catch (error) {
-                console.error("Firebase initialization or authentication error:", error);
-                showMessage("Authentication failed. Cannot load calendar data.", "error", 0);
             }
-        }
-
-        /**
-         * Returns the Firestore collection path for public assignments.
-         */
-        function getAssignmentsCollection() {
-            if (!db || !isAuthReady) {
-                return null;
-            }
-            // Public collection path for shared data
-            return collection(db, `artifacts/${appId}/public/data/assignments`);
         }
         
-        /**
-         * Sets up the real-time listener for all assignments and populates the map.
-         */
-        function startRealtimeAssignmentListener() {
-            const assignmentsCol = getAssignmentsCollection();
-            if (!assignmentsCol) return;
-
-            const q = query(assignmentsCol);
-
-            onSnapshot(q, (snapshot) => {
-                const assignments = [];
-                snapshot.forEach(doc => {
-                    assignments.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // Rebuild the assignment map
-                processAssignmentsToMap(assignments);
-                
-                // Re-render the calendar and the daily list
-                renderCalendar();
-                renderDailyAssignments(selectedDate);
-
-            }, (error) => {
-                console.error("Error fetching assignments for calendar:", error);
-                showMessage("Failed to load calendar events.", "error");
-            });
+        // Handle Dark Mode preference on load
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.documentElement.classList.add('dark');
         }
 
-        /**
-         * Processes raw assignments into a date map for quick calendar lookup.
-         */
-        function processAssignmentsToMap(assignments) {
-            assignmentMap = {};
-
-            assignments.filter(a => !a.isCompleted && a.dueDate).forEach(a => {
-                // Normalize date to YYYY-MM-DD (due dates are stored as YYYY-MM-DD string)
-                const dateKey = a.dueDate; 
-
-                if (!assignmentMap[dateKey]) {
-                    assignmentMap[dateKey] = {
-                        assignments: [],
-                        highestPriority: 'Low', // Start at lowest
-                        priorityColor: PRIORITY_COLOR_MAP['Low']
-                    };
-                }
-
-                assignmentMap[dateKey].assignments.push(a);
-
-                // Update highest priority
-                const currentPriority = assignmentMap[dateKey].highestPriority;
-                const newPriority = a.priority || 'Low';
-                
-                if (newPriority === 'High' || (newPriority === 'Medium' && currentPriority === 'Low')) {
-                    assignmentMap[dateKey].highestPriority = newPriority;
-                    assignmentMap[dateKey].priorityColor = PRIORITY_COLOR_MAP[newPriority];
-                }
-            });
-        }
-
-        /**
-         * Core function to render the calendar grid.
-         */
-        function renderCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-
-            currentMonthYearHeader.textContent = currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-            calendarGrid.innerHTML = '';
-
-            const firstDayOfMonth = new Date(year, month, 1);
-            const lastDayOfMonth = new Date(year, month + 1, 0);
-            const startingDayOfWeek = firstDayOfMonth.getDay(); // 0=Sunday, 6=Saturday
-            const daysInMonth = lastDayOfMonth.getDate();
-
-            // 1. Add padding for days before the 1st
-            for (let i = 0; i < startingDayOfWeek; i++) {
-                calendarGrid.insertAdjacentHTML('beforeend', '<div class="p-2"></div>');
-            }
-
-            // 2. Add actual days
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(year, month, day);
-                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                
-                const isToday = date.toDateString() === new Date().toDateString();
-                const isSelected = date.toDateString() === selectedDate.toDateString();
-                const hasAssignments = assignmentMap[dateKey] && assignmentMap[dateKey].assignments.length > 0;
-                
-                const assignmentData = assignmentMap[dateKey];
-                
-                let cellClasses = 'calendar-cell rounded-lg relative text-slate-800 dark:text-slate-200';
-                if (isToday) cellClasses += ' bg-blue-100 dark:bg-slate-700/50 border border-blue-400 dark:border-blue-600';
-                if (isSelected) cellClasses += ' selected';
-                
-                let dotHTML = '';
-                if (hasAssignments) {
-                    const colorClass = assignmentData.priorityColor;
-                    dotHTML = `<div class="dot w-1.5 h-1.5 rounded-full mt-1 ${colorClass}"></div>`;
-                }
-
-                const dayHTML = `
-                    <div class="${cellClasses}" data-date-key="${dateKey}" data-date="${date.toISOString()}">
-                        <span class="day-number">${day}</span>
-                        ${dotHTML}
-                    </div>
-                `;
-                calendarGrid.insertAdjacentHTML('beforeend', dayHTML);
-            }
-
-            // Re-attach click handlers to the new cells
-            document.querySelectorAll('.calendar-cell').forEach(cell => {
-                if (cell.dataset.dateKey) {
-                    cell.addEventListener('click', () => handleDateSelect(new Date(cell.dataset.date)));
-                }
-            });
-        }
-        
-        /**
-         * Handles selecting a new date on the calendar.
-         */
-        function handleDateSelect(date) {
-            selectedDate = date;
-            
-            // Remove 'selected' class from all cells
-            document.querySelectorAll('.calendar-cell').forEach(cell => cell.classList.remove('selected'));
-            
-            // Add 'selected' class to the clicked cell
-            const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-            const cell = document.querySelector(`[data-date-key="${dateKey}"]`);
-            if (cell) {
-                cell.classList.add('selected');
-            }
-
-            renderDailyAssignments(date);
-        }
-
-        /**
-         * Renders the list of assignments for the selected date.
-         */
-        function renderDailyAssignments(date) {
-            const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-            
-            dailyListHeader.textContent = `Assignments for ${date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}`;
-            dailyAssignmentList.innerHTML = '';
-            
-            const data = assignmentMap[dateKey];
-
-            if (!data || data.assignments.length === 0) {
-                dailyAssignmentList.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-2 rounded-lg">No assignments due on this date.</p>';
-                return;
-            }
-
-            // Sort by priority (High, Medium, Low)
-            const sortedAssignments = data.assignments.sort((a, b) => {
-                const priorityOrder = { 'High': 3, 'Medium': 2, 'Low': 1 };
-                return priorityOrder[b.priority] - priorityOrder[a.priority];
-            });
-
-
-            sortedAssignments.forEach(a => {
-                let priorityClass;
-                switch(a.priority) {
-                    case 'High':
-                        priorityClass = 'bg-accent-red';
-                        break;
-                    case 'Medium':
-                        priorityClass = 'bg-accent-orange';
-                        break;
-                    case 'Low':
-                    default:
-                        priorityClass = 'bg-accent-slate';
-                        break;
-                }
-
-                const assignmentCard = document.createElement('a');
-                assignmentCard.href = `assignments.html?id=${a.id}`;
-                assignmentCard.className = `block p-3 rounded-lg bg-card-light dark:bg-card-dark shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow`;
-                assignmentCard.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <p class="font-semibold truncate">${a.title}</p>
-                        <span class="text-xs font-medium px-2 py-0.5 rounded-full text-white ${priorityClass}">${a.priority || 'Low'}</span>
-                    </div>
-                    <p class="text-sm text-primary mt-1">${a.course}</p>
-                `;
-                dailyAssignmentList.appendChild(assignmentCard);
-            });
-        }
-        
-        /**
-         * Moves the calendar to the previous month.
-         */
-        function prevMonth() {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar();
-        }
-
-        /**
-         * Moves the calendar to the next month.
-         */
-        function nextMonth() {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
-        }
-
-        // --- Event Listeners ---
-        prevMonthButton.addEventListener('click', prevMonth);
-        nextMonthButton.addEventListener('click', nextMonth);
-        
-        // Initialize Firebase and set up listeners
+        // Initialize the app on load
         initializeFirebase();
 
-        // Initial render: Set selected date to today and render calendar
-        selectedDate = new Date();
-        renderCalendar();
-        renderDailyAssignments(selectedDate);
     </script>
 </body>
 </html>
