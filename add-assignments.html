@@ -72,7 +72,7 @@
             
             <!-- Connection Status -->
             <div id="connection-status" class="text-center p-3 rounded-lg text-sm font-medium">
-                Waiting for Connection...
+                Initializing...
             </div>
 
             <!-- Title -->
@@ -112,7 +112,7 @@
             <!-- Submission Button -->
             <button type="submit" id="submit-button" class="w-full flex items-center justify-center p-3 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition-colors disabled:opacity-50" disabled>
                 <span class="material-symbols-outlined mr-2">add_task</span>
-                <span id="button-text">Waiting for Connection...</span>
+                <span id="button-text">Initializing...</span>
             </button>
         </form>
     </main>
@@ -155,7 +155,8 @@
         // Application State
         let db = null;
         let auth = null;
-        let isLocalMode = false;
+        // Determine mode immediately: if config is missing, we MUST use local storage.
+        const isLocalMode = !firebaseConfig;
         const LOCAL_STORAGE_KEY = `academicPlanner_assignments_${appId}`;
 
         // UI Elements
@@ -163,6 +164,13 @@
         const submitButton = document.getElementById('submit-button');
         const buttonText = document.getElementById('button-text');
         const connectionStatusDiv = document.getElementById('connection-status');
+        const requiredInputs = [
+            document.getElementById('title'),
+            document.getElementById('course'),
+            document.getElementById('dueDate')
+        ];
+
+        /* --- UI UTILITY FUNCTIONS --- */
 
         /**
          * Utility function to display messages.
@@ -200,45 +208,35 @@
             }
         }
 
-        /* --- DATA MANIPULATION FUNCTIONS --- */
-
         /**
          * Clears all input fields after successful submission.
          */
         function clearForm() {
             form.reset();
-            // Reset to default Medium priority
             document.getElementById('priority').value = 'Medium'; 
-            // Put focus back on the title
             document.getElementById('title').focus(); 
+            // Re-check validation state after clearing
+            checkFormValidation();
         }
-
+        
         /**
-         * Saves assignment data to Firebase Firestore.
+         * Checks if all required fields are filled to enable the button.
          */
-        async function saveAssignmentFirestore(assignmentData) {
-            try {
-                // Ensure auth is ready and db is initialized
-                if (!db || !auth.currentUser) {
-                    throw new Error("Database not connected or user not authenticated.");
-                }
-                
-                // Define the public collection path
-                const assignmentsCol = collection(db, `artifacts/${appId}/public/data/assignments`);
-                
-                // Add the new document
-                const docRef = await addDoc(assignmentsCol, assignmentData);
-                
-                showMessage("Assignment created successfully (Database mode).", "success");
-                clearForm();
-
-            } catch (error) {
-                console.error("Error writing document to Firestore:", error);
-                showMessage(`Error saving assignment to database: ${error.message}.`, "error");
-            } finally {
+        function checkFormValidation() {
+            const isFormValid = requiredInputs.every(input => input.value.trim() !== '');
+            // Only enable if the form is valid AND initialization is complete
+            if (isFormValid && submitButton.dataset.ready === 'true') {
                 submitButton.disabled = false;
+            } else {
+                submitButton.disabled = true;
             }
         }
+        
+        // Add listeners to enable/disable button dynamically
+        requiredInputs.forEach(input => input.addEventListener('input', checkFormValidation));
+        document.getElementById('priority').addEventListener('change', checkFormValidation);
+        
+        /* --- DATA MANIPULATION FUNCTIONS --- */
 
         /**
          * Reads all assignments from local storage.
@@ -254,11 +252,11 @@
         }
         
         /**
-         * Saves assignment data to local storage (Critical Fix implemented here).
+         * Saves assignment data to local storage (FIXED: ensures array manipulation).
          */
         function saveAssignmentLocal(assignmentData) {
             try {
-                // 1. Give the assignment a unique ID, required for CRUD operations later
+                // 1. Give the assignment a unique ID
                 assignmentData.id = crypto.randomUUID(); 
                 
                 // 2. Fetch existing data
@@ -270,14 +268,48 @@
                 // 4. Save the entire array back to local storage
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(assignments));
 
-                showMessage("Assignment created successfully (Local Mode).", "success");
+                showMessage("Assignment created successfully (Local Mode). Redirecting...", "success");
                 clearForm();
+                
+                // Redirect user to the assignments list to see the change
+                setTimeout(() => {
+                    window.location.href = "assignments.html";
+                }, 500);
 
             } catch (error) {
                 console.error("Error writing to local storage:", error);
                 showMessage("Error: Failed to save assignment locally.", "error");
             } finally {
-                submitButton.disabled = false;
+                // Button enablement is handled by validation check, not here.
+            }
+        }
+        
+        /**
+         * Saves assignment data to Firebase Firestore.
+         */
+        async function saveAssignmentFirestore(assignmentData) {
+            try {
+                if (!db || !auth.currentUser) {
+                    throw new Error("Database not connected or user not authenticated.");
+                }
+                
+                const assignmentsCol = collection(db, `artifacts/${appId}/public/data/assignments`);
+                await addDoc(assignmentsCol, assignmentData);
+                
+                showMessage("Assignment created successfully (Database mode). Redirecting...", "success");
+                clearForm();
+                
+                // Redirect user to the assignments list to see the change
+                setTimeout(() => {
+                    window.location.href = "assignments.html";
+                }, 500);
+
+            } catch (error) {
+                console.error("Error writing document to Firestore:", error);
+                showMessage(`Error saving assignment to database: ${error.message}.`, "error");
+            } finally {
+                // Re-check validation state after submission attempt
+                checkFormValidation();
             }
         }
 
@@ -285,16 +317,17 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            // Disable button during processing
             submitButton.disabled = true;
 
             const assignmentData = {
                 title: document.getElementById('title').value,
                 course: document.getElementById('course').value,
-                dueDate: document.getElementById('dueDate').value, // YYYY-MM-DD format
+                dueDate: document.getElementById('dueDate').value, 
                 priority: document.getElementById('priority').value,
                 notes: document.getElementById('notes').value,
                 createdAt: new Date().toISOString(),
-                isCompleted: false, // Default status
+                isCompleted: false,
             };
 
             if (isLocalMode) {
@@ -305,51 +338,66 @@
         });
 
         /* --- INITIALIZATION --- */
+        
+        /**
+         * Finalizes initialization steps after determining mode.
+         */
+        function finalizeInitialization(success) {
+            submitButton.dataset.ready = 'true';
+            
+            if (isLocalMode) {
+                connectionStatusDiv.textContent = `Local Mode (Data is saved only in this browser)`;
+                connectionStatusDiv.classList.add('bg-orange-100', 'text-orange-800', 'dark:bg-orange-800', 'dark:text-orange-200');
+                buttonText.textContent = 'Create Assignment (Local Mode)';
+            } else if (success) {
+                connectionStatusDiv.textContent = 'Database Connected (Shared Data)';
+                connectionStatusDiv.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-800', 'dark:text-green-200');
+                buttonText.textContent = 'Create Assignment';
+            } else {
+                 // Fallback status if DB attempt failed and we are stuck in Local Mode
+                connectionStatusDiv.textContent = 'Local Mode (DB connection failed)';
+                connectionStatusDiv.classList.add('bg-orange-100', 'text-orange-800', 'dark:bg-orange-800', 'dark:text-orange-200');
+                buttonText.textContent = 'Create Assignment (Local Mode)';
+            }
+            // Re-check validation to potentially enable the button if fields are already filled
+            checkFormValidation();
+        }
+
 
         /**
          * Initializes Firebase or falls back to Local Mode.
+         * The function name was changed to avoid shadowing error in module scope.
          */
-        async function initializeFirebase() {
-            if (!firebaseConfig) {
-                isLocalMode = true;
-                console.warn("Firebase configuration missing. Switching to Local Mode.");
-                connectionStatusDiv.textContent = 'Local Mode (Data is saved only in this browser)';
-                connectionStatusDiv.classList.add('bg-orange-100', 'text-orange-800', 'dark:bg-orange-800', 'dark:text-orange-200');
+        async function startApplication() {
+            if (isLocalMode) {
+                finalizeInitialization(false); // Success status is irrelevant in forced local mode
+                return;
+            } 
+            
+            // Attempt to connect to Firebase
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
                 
-                buttonText.textContent = 'Create Assignment (Local Mode)';
-                submitButton.disabled = false;
-                
-            } else {
-                try {
-                    const app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    auth = getAuth(app);
-                    
-                    // Attempt to authenticate
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                    
-                    connectionStatusDiv.textContent = 'Database Connected (Shared Data)';
-                    connectionStatusDiv.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-800', 'dark:text-green-200');
-                    buttonText.textContent = 'Create Assignment';
-                    submitButton.disabled = false;
-                    
-                } catch (error) {
-                    console.error("Firebase initialization failed, falling back to Local Mode:", error);
-                    isLocalMode = true;
-                    connectionStatusDiv.textContent = 'Local Mode (Database connection failed)';
-                    connectionStatusDiv.classList.add('bg-orange-100', 'text-orange-800', 'dark:bg-orange-800', 'dark:text-orange-200');
-                    buttonText.textContent = 'Create Assignment (Local Mode)';
-                    submitButton.disabled = false;
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
                 }
+                
+                finalizeInitialization(true);
+
+            } catch (error) {
+                console.error("Firebase initialization failed, forcing Local Mode:", error);
+                // Even though isLocalMode was initially false, the connection failed.
+                // We use the Local Mode UI status here.
+                finalizeInitialization(false);
             }
         }
 
         // Initialize the app on load
-        initializeFirebase();
+        startApplication();
 
     </script>
 </body>
