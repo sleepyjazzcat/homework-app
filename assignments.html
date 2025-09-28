@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Assignments</title>
+    <title>My Assignments</title>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
@@ -46,69 +46,95 @@
             'GRAD' 0,
             'opsz' 24
         }
+        .text-line-through {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
     <div class="flex flex-col min-h-screen">
         <!-- Header -->
-        <header class="bg-background-light dark:bg-background-dark sticky top-0 z-10 shadow-sm border-b border-slate-200 dark:border-slate-700">
-            <div class="flex items-center justify-between p-4">
-                <button id="back-button" class="hidden flex items-center justify-center w-10 h-10 rounded-full text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                </button>
+        <header class="bg-card-light dark:bg-card-dark sticky top-0 z-10 shadow-md border-b border-slate-200 dark:border-slate-700">
+            <div class="p-4 flex items-center justify-between">
                 <h1 id="header-title" class="text-xl font-bold text-slate-900 dark:text-white flex-1 text-center">Assignments</h1>
-                <div class="w-10 h-10"></div> <!-- Placeholder for alignment -->
+                <a href="add-assignments.html" class="text-primary hover:text-blue-600 dark:hover:text-blue-400">
+                    <span class="material-symbols-outlined text-3xl">add_circle</span>
+                </a>
+            </div>
+            <!-- Filter Tabs (List View Only) -->
+            <div id="filter-tabs" class="flex justify-around bg-background-light dark:bg-background-dark p-2 border-t border-slate-200 dark:border-slate-700 hidden">
+                <button data-filter="all" class="filter-button text-sm font-medium py-1 px-3 rounded-full bg-primary text-white transition-colors">All</button>
+                <button data-filter="upcoming" class="filter-button text-sm font-medium py-1 px-3 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Upcoming</button>
+                <button data-filter="completed" class="filter-button text-sm font-medium py-1 px-3 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Completed</button>
             </div>
         </header>
 
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="flex justify-center items-center py-8">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Loading assignments...</span>
+        </div>
+        
         <!-- Message Box for Feedback -->
         <div id="message-box" class="hidden mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300"></div>
 
-
         <!-- Main Content Area -->
-        <main class="flex-1 px-4 py-6 space-y-8 overflow-y-auto">
+        <main class="flex-1 px-4 py-6 overflow-y-auto">
+            <!-- Assignment List View -->
+            <div id="assignment-list-view" class="space-y-3 hidden">
+                <div id="assignments-container" class="space-y-3">
+                    <!-- Assignment Cards will be injected here -->
+                </div>
+                <p id="no-assignments" class="text-center text-slate-500 dark:text-slate-400 p-8 hidden">You have no assignments yet. Tap '+' to add one!</p>
+            </div>
 
             <!-- Assignment Detail View -->
-            <div id="assignment-detail" class="hidden">
-                <div class="bg-card-light dark:bg-slate-800 p-6 rounded-xl shadow-lg space-y-4 border border-slate-100 dark:border-slate-700">
+            <div id="assignment-detail-view" class="space-y-6 hidden">
+                <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 space-y-4">
                     <h2 id="detail-title" class="text-3xl font-extrabold text-slate-900 dark:text-white"></h2>
-                    <div class="flex flex-wrap gap-4 text-sm font-medium">
-                        <span id="detail-course" class="px-3 py-1 bg-primary/10 text-primary rounded-full"></span>
-                        <span id="detail-due-date" class="px-3 py-1 rounded-full"></span>
-                        <span id="detail-priority" class="px-3 py-1 rounded-full"></span>
-                        <span id="detail-status" class="px-3 py-1 rounded-full"></span>
+                    <p id="detail-class" class="text-lg font-medium text-primary"></p>
+                    <div class="flex items-center space-x-4 text-sm">
+                        <span class="flex items-center gap-1 text-slate-500 dark:text-slate-400"><span class="material-symbols-outlined text-base">calendar_today</span> <span id="detail-due-date"></span></span>
+                        <span id="detail-priority" class="font-medium px-2 py-0.5 rounded-full text-white"></span>
                     </div>
-
-                    <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
-                        <h3 class="text-lg font-semibold mb-2">Details</h3>
-                        <p id="detail-description" class="text-slate-600 dark:text-slate-300 whitespace-pre-wrap"></p>
+                    <p id="detail-description" class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap pt-2"></p>
+                    <div id="completion-status" class="pt-4 text-center font-bold text-lg hidden">
+                        <span class="text-green-600 dark:text-green-400 flex items-center justify-center gap-2"><span class="material-symbols-outlined">check_circle</span> COMPLETED</span>
                     </div>
+                </div>
 
-                    <button id="complete-button" class="w-full mt-6 flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-3 rounded-lg text-lg font-semibold shadow-md hover:bg-green-700 transition-colors disabled:bg-gray-400">
-                        <span class="material-symbols-outlined">check_circle</span>
-                        Mark as Complete
+                <div class="grid grid-cols-2 gap-4">
+                    <button id="toggle-complete-button" class="bg-green-500 text-white font-bold h-12 rounded-lg text-base tracking-wide hover:bg-green-600 transition-colors flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">done</span> Mark Complete
                     </button>
-                    <p id="completion-message" class="text-center text-sm text-green-600 dark:text-green-400 hidden">You finished this assignment! Great job.</p>
+                    <button id="delete-button" class="bg-red-500 text-white font-bold h-12 rounded-lg text-base tracking-wide hover:bg-red-600 transition-colors flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">delete</span> Delete
+                    </button>
                 </div>
+                <a href="assignments.html" class="block text-center text-primary hover:text-blue-600 mt-4 text-sm font-medium">
+                    ← Back to All Assignments
+                </a>
             </div>
-
-            <!-- Assignment List View -->
-            <div id="assignment-list-view">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Your Tasks</h2>
-                    <div class="flex gap-2 p-1 bg-card-light dark:bg-slate-800 rounded-full shadow-inner border border-slate-200 dark:border-slate-700">
-                        <button id="filter-upcoming" class="px-3 py-1 text-sm font-medium rounded-full bg-primary text-white transition-colors">Upcoming</button>
-                        <button id="filter-completed" class="px-3 py-1 text-sm font-medium rounded-full text-slate-500 dark:text-slate-400 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">Completed</button>
+            
+            <!-- Delete Confirmation Modal (Custom UI) -->
+            <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-2xl w-full max-w-sm m-4 space-y-4">
+                    <h3 class="text-xl font-bold">Confirm Deletion</h3>
+                    <p>Are you sure you want to delete this assignment? This action cannot be undone.</p>
+                    <div class="flex justify-end space-x-3">
+                        <button id="cancel-delete-button" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-lg text-slate-800 dark:text-slate-200 font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">Cancel</button>
+                        <button id="confirm-delete-button" class="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors">Delete Permanently</button>
                     </div>
                 </div>
-
-                <div id="assignments-list" class="space-y-3">
-                    <p id="loading-indicator" class="text-center text-slate-500 dark:text-slate-400 p-4">Loading assignments...</p>
-                </div>
             </div>
+            
         </main>
 
-        <!-- Footer Navigation (Consistent with Dashboard) -->
+        <!-- Footer Navigation (Consistent with other pages) -->
         <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
             <nav class="flex justify-around p-2">
                 <!-- Dashboard Link -->
@@ -121,7 +147,7 @@
                     <span class="material-symbols-outlined">list_alt</span>
                     <span class="text-xs font-medium">Assignments</span>
                 </a>
-                <!-- Calendar Link (Needs index.html file) -->
+                <!-- Calendar Link -->
                 <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="index.html">
                     <span class="material-symbols-outlined">calendar_month</span>
                     <span class="text-xs font-medium">Calendar</span>
@@ -129,7 +155,7 @@
                 <!-- Settings Link -->
                 <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="settings.html">
                     <span class="material-symbols-outlined">settings</span>
-                    <span class="text-xs font-medium">settings</span>
+                    <span class="text-xs font-medium">Settings</span>
                 </a>
             </nav>
         </footer>
@@ -139,7 +165,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, query, where, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, updateDoc, doc, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Set log level for debugging
         setLogLevel('Debug');
@@ -151,33 +177,67 @@
 
         let db;
         let auth;
-        let userId = null;
         let isAuthReady = false;
-        let allAssignments = []; // Store all assignments globally
+        let currentAssignments = [];
+        let currentAssignmentId = null; // Used for detail view
 
         // UI elements
-        const assignmentsListView = document.getElementById('assignment-list-view');
-        const assignmentDetailView = document.getElementById('assignment-detail');
-        const assignmentsList = document.getElementById('assignments-list');
-        const headerTitle = document.getElementById('header-title');
-        const backButton = document.getElementById('back-button');
+        const loadingIndicator = document.getElementById('loading-indicator');
         const messageBox = document.getElementById('message-box');
-        const completeButton = document.getElementById('complete-button');
-        const completionMessage = document.getElementById('completion-message');
-        const loadingIndicator = document.getElementById('loading-indicator'); // <-- ADDED LOADING INDICATOR REFERENCE
+        const headerTitle = document.getElementById('header-title');
+        const filterTabs = document.getElementById('filter-tabs');
+        
+        const assignmentListView = document.getElementById('assignment-list-view');
+        const assignmentsContainer = document.getElementById('assignments-container');
+        const noAssignmentsMessage = document.getElementById('no-assignments');
+        
+        const assignmentDetailView = document.getElementById('assignment-detail-view');
+        const toggleCompleteButton = document.getElementById('toggle-complete-button');
+        const deleteButton = document.getElementById('delete-button');
+        const deleteModal = document.getElementById('delete-modal');
+        const confirmDeleteButton = document.getElementById('confirm-delete-button');
+        const cancelDeleteButton = document.getElementById('cancel-delete-button');
 
-        // Filter buttons
-        const filterUpcomingButton = document.getElementById('filter-upcoming');
-        const filterCompletedButton = document.getElementById('filter-completed');
-        let currentFilter = 'upcoming'; // 'upcoming' or 'completed'
+        let currentFilter = 'all';
+
+        /**
+         * Utility function to display messages.
+         */
+        function showMessage(message, type, duration = 3000) {
+            let bgColor, textColor;
+            switch (type) {
+                case 'success':
+                    bgColor = 'bg-green-100 dark:bg-green-900';
+                    textColor = 'text-green-700 dark:text-green-300';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-100 dark:bg-red-900';
+                    textColor = 'text-red-700 dark:text-red-300';
+                    break;
+                default:
+                    bgColor = 'bg-blue-100 dark:bg-blue-900';
+                    textColor = 'text-blue-700 dark:text-blue-300';
+            }
+
+            messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
+            messageBox.innerHTML = message;
+            messageBox.classList.remove('hidden');
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    messageBox.classList.add('opacity-0');
+                    setTimeout(() => messageBox.classList.add('hidden', 'opacity-100'), 300);
+                }, duration);
+            }
+        }
 
         /**
          * Initializes Firebase and authenticates the user.
          */
         async function initializeFirebase() {
             if (!firebaseConfig) {
-                console.error("Firebase configuration not found.");
-                showMessage("Database connection failed. Check console for details.", "error");
+                loadingIndicator.classList.add('hidden');
+                showMessage("Database connection failed. Configuration missing. Data cannot be loaded.", "error", 0);
                 return;
             }
 
@@ -192,16 +252,24 @@
                     await signInAnonymously(auth);
                 }
 
-                userId = auth.currentUser?.uid || crypto.randomUUID();
                 isAuthReady = true;
-                console.log("Firebase initialized. User ID:", userId);
+                console.log("Firebase initialized.");
 
-                // Start listening for data immediately after auth is ready
-                startRealtimeAssignmentListener();
+                // Determine if we are viewing a list or a detail
+                const urlParams = new URLSearchParams(window.location.search);
+                currentAssignmentId = urlParams.get('id');
+
+                if (currentAssignmentId) {
+                    displayDetailView(currentAssignmentId);
+                } else {
+                    displayListView();
+                    startRealtimeAssignmentListener();
+                }
                 
             } catch (error) {
                 console.error("Firebase initialization or authentication error:", error);
-                showMessage("Authentication failed. Cannot load data.", "error");
+                loadingIndicator.classList.add('hidden');
+                showMessage("Authentication failed. Cannot load assignment data.", "error", 0);
             }
         }
 
@@ -210,241 +278,14 @@
          */
         function getAssignmentsCollection() {
             if (!db || !isAuthReady) {
-                console.error("Firestore not ready.");
                 return null;
             }
+            // Public collection path for shared data
             return collection(db, `artifacts/${appId}/public/data/assignments`);
         }
-
-        /**
-         * Displays a temporary message to the user.
-         */
-        function showMessage(message, type, duration = 3000) {
-            let bgColor, textColor;
-            
-            switch (type) {
-                case 'success':
-                    bgColor = 'bg-green-100 dark:bg-green-900';
-                    textColor = 'text-green-700 dark:text-green-300';
-                    break;
-                case 'error':
-                    bgColor = 'bg-red-100 dark:bg-red-900';
-                    textColor = 'text-red-700 dark:text-red-300';
-                    break;
-                case 'info':
-                    bgColor = 'bg-blue-100 dark:bg-blue-900';
-                    textColor = 'text-blue-700 dark:text-blue-300';
-                    break;
-                default:
-                    bgColor = 'bg-gray-100 dark:bg-gray-700';
-                    textColor = 'text-gray-800 dark:text-gray-200';
-            }
-
-            messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
-            messageBox.innerHTML = message;
-            messageBox.classList.remove('hidden');
-
-            if (duration > 0) {
-                setTimeout(() => {
-                    messageBox.classList.add('opacity-0');
-                    setTimeout(() => messageBox.classList.add('hidden'), 300);
-                }, duration);
-            }
-        }
-
-
-        /**
-         * Creates an HTML card for an assignment in the list view.
-         */
-        function createAssignmentCard(assignment) {
-            const dueDate = new Date(assignment.dueDate);
-            const today = new Date();
-            
-            let dueText = 'Due: ' + dueDate.toLocaleDateString();
-            let dueColor = 'text-slate-500 dark:text-slate-400';
-            
-            const daysUntilDue = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-
-            if (assignment.isCompleted) {
-                dueText = 'Completed!';
-                dueColor = 'text-green-600 dark:text-green-400';
-            } else if (daysUntilDue < 0) {
-                dueText = 'Overdue';
-                dueColor = 'text-red-600 dark:text-red-500';
-            } else if (daysUntilDue <= 2) {
-                dueText = daysUntilDue === 0 ? 'Due Today' : (daysUntilDue === 1 ? 'Due Tomorrow' : `Due in ${daysUntilDue} days`);
-                dueColor = 'text-red-600 dark:text-red-500';
-            }
-            
-            const card = document.createElement('a');
-            card.href = `assignments.html?id=${assignment.id}`;
-            card.className = "block bg-card-light dark:bg-slate-800 p-4 rounded-xl shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow flex justify-between items-center";
-            card.innerHTML = `
-                <div class="flex flex-col flex-1 min-w-0 pr-4">
-                    <p class="font-semibold text-slate-900 dark:text-white truncate">${assignment.title}</p>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">${assignment.course} - Priority: ${assignment.priority || 'Low'}</p>
-                </div>
-                <div class="text-right flex-shrink-0">
-                    <p class="font-medium text-sm ${dueColor}">${dueText}</p>
-                    ${assignment.isCompleted ? '<span class="material-symbols-outlined text-green-600 dark:text-green-400 text-lg">done_all</span>' : ''}
-                </div>
-            `;
-            return card;
-        }
-
-        /**
-         * Renders the assignments list based on the current filter.
-         */
-        function renderAssignmentsList(assignments) {
-            const filteredAssignments = assignments.filter(a => {
-                const isUpcoming = !a.isCompleted;
-                if (currentFilter === 'upcoming') {
-                    return isUpcoming;
-                } else if (currentFilter === 'completed') {
-                    return a.isCompleted;
-                }
-                return true; // Should not happen
-            }).sort((a, b) => {
-                // Sort upcoming by due date (ascending)
-                if (currentFilter === 'upcoming') {
-                    return new Date(a.dueDate) - new Date(b.dueDate);
-                }
-                // Sort completed by completion date (descending, newest first)
-                return new Date(b.completionDate || 0) - new Date(a.completionDate || 0);
-            });
-
-            assignmentsList.innerHTML = ''; 
-
-            if (filteredAssignments.length === 0) {
-                const message = currentFilter === 'upcoming'
-                    ? "You're all caught up! No upcoming assignments found."
-                    : "No assignments have been marked as complete yet.";
-                assignmentsList.innerHTML = `<p class="text-center text-slate-500 dark:text-slate-400 p-4">${message}</p>`;
-            } else {
-                filteredAssignments.forEach(assignment => {
-                    assignmentsList.appendChild(createAssignmentCard(assignment));
-                });
-            }
-        }
-
-        /**
-         * Renders the detail view for a specific assignment.
-         */
-        function renderAssignmentDetail(assignment) {
-            headerTitle.textContent = 'Details';
-            backButton.classList.remove('hidden');
-            assignmentsListView.classList.add('hidden');
-            assignmentDetailView.classList.remove('hidden');
-
-            document.getElementById('detail-title').textContent = assignment.title;
-            document.getElementById('detail-description').textContent = assignment.description;
-            document.getElementById('detail-course').textContent = assignment.course;
-            
-            const dueDate = new Date(assignment.dueDate).toLocaleDateString();
-            document.getElementById('detail-due-date').textContent = `Due: ${dueDate}`;
-
-            const priorityElement = document.getElementById('detail-priority');
-            priorityElement.textContent = `Priority: ${assignment.priority || 'Low'}`;
-            priorityElement.className = `px-3 py-1 rounded-full text-white ${assignment.priority === 'High' ? 'bg-red-500' : (assignment.priority === 'Medium' ? 'bg-orange-500' : 'bg-slate-500')}`;
-
-            const statusElement = document.getElementById('detail-status');
-            const isCompleted = assignment.isCompleted;
-
-            if (isCompleted) {
-                statusElement.textContent = 'Status: Completed';
-                statusElement.className = 'px-3 py-1 rounded-full bg-green-500 text-white';
-                completeButton.disabled = true;
-                completeButton.classList.remove('bg-green-600', 'hover:bg-green-700');
-                completeButton.classList.add('bg-gray-400', 'cursor-default');
-                completeButton.innerHTML = `<span class="material-symbols-outlined">done_all</span> Completed on ${new Date(assignment.completionDate).toLocaleDateString()}`;
-                completionMessage.classList.add('hidden');
-            } else {
-                statusElement.textContent = 'Status: Pending';
-                statusElement.className = 'px-3 py-1 rounded-full bg-yellow-500 text-white';
-                completeButton.disabled = false;
-                completeButton.classList.add('bg-green-600', 'hover:bg-green-700');
-                completeButton.classList.remove('bg-gray-400', 'cursor-default');
-                completeButton.innerHTML = `<span class="material-symbols-outlined">check_circle</span> Mark as Complete`;
-                completionMessage.classList.add('hidden');
-            }
-
-            // Re-attach event listener for the complete button
-            completeButton.onclick = () => handleCompleteAssignment(assignment.id);
-        }
-
-        /**
-         * Switches the view based on the URL.
-         */
-        function handleRouting() {
-            const params = new URLSearchParams(window.location.search);
-            const assignmentId = params.get('id');
-
-            if (assignmentId) {
-                const assignment = allAssignments.find(a => a.id === assignmentId);
-                if (assignment) {
-                    renderAssignmentDetail(assignment);
-                } else {
-                    showMessage("Assignment not found.", "error");
-                    // Fallback to list view if ID is bad
-                    window.history.pushState({}, '', 'assignments.html');
-                    handleRouting();
-                }
-            } else {
-                // List View
-                headerTitle.textContent = 'Assignments';
-                backButton.classList.add('hidden');
-                assignmentDetailView.classList.add('hidden');
-                assignmentsListView.classList.remove('hidden');
-                renderAssignmentsList(allAssignments);
-            }
-        }
-
-        /**
-         * Marks an assignment as complete in Firestore.
-         */
-        async function handleCompleteAssignment(assignmentId) {
-            if (!db || !assignmentId) return;
-
-            const assignmentRef = doc(db, `artifacts/${appId}/public/data/assignments`, assignmentId);
-            
-            try {
-                await updateDoc(assignmentRef, {
-                    isCompleted: true,
-                    completionDate: new Date().toISOString()
-                });
-                showMessage("Assignment marked as complete!", "success");
-            } catch (error) {
-                console.error("Error completing assignment:", error);
-                showMessage("Failed to mark assignment as complete. Try again.", "error");
-            }
-        }
         
-        // Event Listeners for filters
-        filterUpcomingButton.addEventListener('click', () => {
-            currentFilter = 'upcoming';
-            filterUpcomingButton.classList.add('bg-primary', 'text-white');
-            filterCompletedButton.classList.remove('bg-primary', 'text-white');
-            filterCompletedButton.classList.add('text-slate-500', 'dark:text-slate-400');
-            renderAssignmentsList(allAssignments);
-        });
-
-        filterCompletedButton.addEventListener('click', () => {
-            currentFilter = 'completed';
-            filterCompletedButton.classList.add('bg-primary', 'text-white');
-            filterUpcomingButton.classList.remove('bg-primary', 'text-white');
-            filterUpcomingButton.classList.add('text-slate-500', 'dark:text-slate-400');
-            renderAssignmentsList(allAssignments);
-        });
-
-        // Event listener for the back button in detail view
-        backButton.addEventListener('click', () => {
-            window.history.pushState({}, '', 'assignments.html');
-            handleRouting();
-        });
-
-
         /**
-         * Sets up the real-time listener for assignments.
+         * Sets up the real-time listener for all assignments.
          */
         function startRealtimeAssignmentListener() {
             const assignmentsCol = getAssignmentsCollection();
@@ -453,99 +294,249 @@
             const q = query(assignmentsCol);
 
             onSnapshot(q, (snapshot) => {
-                allAssignments = [];
+                loadingIndicator.classList.add('hidden');
+                const assignments = [];
                 snapshot.forEach(doc => {
-                    allAssignments.push({ id: doc.id, ...doc.data() });
+                    assignments.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // Once data is loaded, handle the current URL state (list or detail)
-                handleRouting();
-                
-                // Hides the loading indicator once data is available
-                if (loadingIndicator) {
-                    loadingIndicator.classList.add('hidden');
-                }
+                currentAssignments = assignments;
+                renderAssignmentList(currentFilter);
 
             }, (error) => {
                 console.error("Error fetching assignments:", error);
-                assignmentsList.innerHTML = `<p class="text-center text-red-500">Failed to load assignments: ${error.message}</p>`;
+                showMessage("Failed to load assignments list.", "error");
             });
         }
 
+        /**
+         * Renders the list of assignments based on the current filter.
+         */
+        function renderAssignmentList(filter) {
+            assignmentsContainer.innerHTML = '';
+            
+            // 1. Sort assignments by due date
+            const sortedAssignments = currentAssignments.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+            // 2. Apply filter
+            const filtered = sortedAssignments.filter(a => {
+                switch (filter) {
+                    case 'upcoming':
+                        return !a.isCompleted;
+                    case 'completed':
+                        return a.isCompleted;
+                    case 'all':
+                    default:
+                        return true;
+                }
+            });
+
+            if (filtered.length === 0) {
+                noAssignmentsMessage.classList.remove('hidden');
+            } else {
+                noAssignmentsMessage.classList.add('hidden');
+            }
+
+            filtered.forEach(a => {
+                const dueDate = new Date(a.dueDate).toLocaleDateString(undefined, {
+                    year: 'numeric', month: 'short', day: 'numeric'
+                });
+                const isCompletedClass = a.isCompleted ? 'bg-green-50 dark:bg-green-900 border-green-300 dark:border-green-700 text-line-through' : 'bg-card-light dark:bg-card-dark border-slate-200 dark:border-slate-700 hover:shadow-lg';
+
+                let priorityClass;
+                switch(a.priority) {
+                    case 'High':
+                        priorityClass = 'bg-red-500';
+                        break;
+                    case 'Medium':
+                        priorityClass = 'bg-orange-500';
+                        break;
+                    case 'Low':
+                    default:
+                        priorityClass = 'bg-slate-500';
+                        break;
+                }
+
+                const card = document.createElement('a');
+                card.href = `assignments.html?id=${a.id}`;
+                card.className = `block p-4 rounded-xl shadow-md transition-shadow border ${isCompletedClass}`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <p class="font-semibold text-slate-900 dark:text-white truncate">${a.title}</p>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full text-white ${priorityClass}">${a.priority || 'Low'}</span>
+                    </div>
+                    <p class="text-sm text-primary mt-1">${a.course}</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Due: ${dueDate}</p>
+                `;
+                assignmentsContainer.appendChild(card);
+            });
+        }
+        
+        /**
+         * Displays the list view and hides the detail view.
+         */
+        function displayListView() {
+            headerTitle.textContent = 'Assignments';
+            filterTabs.classList.remove('hidden');
+            assignmentListView.classList.remove('hidden');
+            assignmentDetailView.classList.add('hidden');
+        }
+
+        /**
+         * Displays the detail view for a specific assignment ID.
+         */
+        function displayDetailView(id) {
+            assignmentListView.classList.add('hidden');
+            filterTabs.classList.add('hidden');
+            assignmentDetailView.classList.remove('hidden');
+
+            const assignment = currentAssignments.find(a => a.id === id);
+            
+            if (!assignment) {
+                // If the assignment isn't in the current list, fetch it directly
+                fetchAssignmentDetail(id);
+                return;
+            }
+            
+            // Set global ID reference
+            currentAssignmentId = id;
+            
+            // Render Details
+            document.getElementById('detail-title').textContent = assignment.title;
+            document.getElementById('detail-class').textContent = assignment.course;
+            document.getElementById('detail-due-date').textContent = new Date(assignment.dueDate).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('detail-description').textContent = assignment.description || 'No description provided.';
+            
+            // Priority Styling
+            const priorityElement = document.getElementById('detail-priority');
+            priorityElement.textContent = assignment.priority || 'Low';
+            priorityElement.className = 'font-medium px-2 py-0.5 rounded-full text-white';
+            switch(assignment.priority) {
+                case 'High': priorityElement.classList.add('bg-red-500'); break;
+                case 'Medium': priorityElement.classList.add('bg-orange-500'); break;
+                default: priorityElement.classList.add('bg-slate-500'); break;
+            }
+
+            // Completion Status and Button
+            const completionStatus = document.getElementById('completion-status');
+            if (assignment.isCompleted) {
+                completionStatus.classList.remove('hidden');
+                toggleCompleteButton.textContent = 'Mark Uncomplete';
+                toggleCompleteButton.classList.remove('bg-green-500', 'hover:bg-green-600');
+                toggleCompleteButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                headerTitle.textContent = 'Assignment Details (Completed)';
+            } else {
+                completionStatus.classList.add('hidden');
+                toggleCompleteButton.textContent = 'Mark Complete';
+                toggleCompleteButton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                toggleCompleteButton.classList.add('bg-green-500', 'hover:bg-green-600');
+                headerTitle.textContent = 'Assignment Details';
+            }
+        }
+        
+        /**
+         * Fetches a single assignment detail using onSnapshot if the initial data is missing.
+         */
+        function fetchAssignmentDetail(id) {
+            loadingIndicator.classList.remove('hidden');
+            const docRef = doc(db, `artifacts/${appId}/public/data/assignments`, id);
+            
+            onSnapshot(docRef, (docSnapshot) => {
+                loadingIndicator.classList.add('hidden');
+                if (docSnapshot.exists()) {
+                    displayDetailView(id); // Re-run display using the now-updated data
+                } else {
+                    showMessage("Assignment not found.", "error");
+                    headerTitle.textContent = 'Error';
+                }
+            }, (error) => {
+                console.error("Error fetching single assignment:", error);
+                loadingIndicator.classList.add('hidden');
+                showMessage("Failed to load assignment details.", "error");
+            });
+        }
+
+        /**
+         * Toggles the completion status of the current assignment.
+         */
+        async function toggleCompletion() {
+            if (!currentAssignmentId) return;
+
+            const assignment = currentAssignments.find(a => a.id === currentAssignmentId);
+            if (!assignment) return;
+
+            const docRef = doc(db, `artifacts/${appId}/public/data/assignments`, currentAssignmentId);
+            
+            try {
+                await updateDoc(docRef, {
+                    isCompleted: !assignment.isCompleted
+                });
+                showMessage(`Assignment marked as ${assignment.isCompleted ? 'uncomplete' : 'complete'}!`, 'success');
+                // The onSnapshot listener will automatically call displayDetailView again
+            } catch (error) {
+                console.error("Error toggling completion:", error);
+                showMessage("Failed to update assignment status.", 'error');
+            }
+        }
+
+        /**
+         * Deletes the current assignment.
+         */
+        async function deleteAssignment() {
+            if (!currentAssignmentId) return;
+
+            const docRef = doc(db, `artifacts/${appId}/public/data/assignments`, currentAssignmentId);
+
+            try {
+                await deleteDoc(docRef);
+                showMessage("Assignment deleted successfully!", 'success');
+                deleteModal.classList.add('hidden');
+                
+                // Redirect back to the list view
+                setTimeout(() => {
+                    window.location.href = 'assignments.html';
+                }, 500);
+
+            } catch (error) {
+                console.error("Error deleting assignment:", error);
+                showMessage("Failed to delete assignment.", 'error');
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Filter button listeners
+        document.querySelectorAll('.filter-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                currentFilter = e.target.dataset.filter;
+                document.querySelectorAll('.filter-button').forEach(btn => {
+                    if (btn.dataset.filter === currentFilter) {
+                        btn.classList.add('bg-primary', 'text-white');
+                        btn.classList.remove('text-slate-500', 'dark:text-slate-400', 'hover:bg-slate-200', 'dark:hover:bg-slate-700');
+                    } else {
+                        btn.classList.remove('bg-primary', 'text-white');
+                        btn.classList.add('text-slate-500', 'dark:text-slate-400', 'hover:bg-slate-200', 'dark:hover:bg-slate-700');
+                    }
+                });
+                renderAssignmentList(currentFilter);
+            });
+        });
+        
+        // Detail View Action Button Listeners
+        toggleCompleteButton.addEventListener('click', toggleCompletion);
+        
+        deleteButton.addEventListener('click', () => {
+            deleteModal.classList.remove('hidden');
+        });
+
+        cancelDeleteButton.addEventListener('click', () => {
+            deleteModal.classList.add('hidden');
+        });
+
+        confirmDeleteButton.addEventListener('click', deleteAssignment);
 
         // Initialize Firebase on load
         initializeFirebase();
     </script>
 </body>
 </html>
-<h3 class="text-sm font-medium text-black/60 dark:text-white/60 mb-1">Due Date</h3>
-<p class="font-semibold">October 26, 2024</p>
-</div>
-<div class="bg-white dark:bg-slate-800 p-4 rounded-lg border border-black/10 dark:border-white/10 shadow-sm">
-<h3 class="text-sm font-medium text-black/60 dark:text-white/60 mb-1">Priority</h3>
-<div class="flex items-center gap-2">
-<span class="w-3 h-3 rounded-full bg-red-500"></span>
-<p class="font-semibold">High</p>
-</div>
-</div>
-</div>
-<!-- Additional Information Section -->
-<section class="space-y-4 pt-2">
-<h3 class="text-xl font-bold text-black dark:text-white">Submission Instructions</h3>
-<div class="bg-white dark:bg-slate-800 p-4 rounded-lg border border-black/10 dark:border-white/10 shadow-sm space-y-3">
-<div class="flex items-start gap-3">
-<div class="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-primary/10 text-primary rounded-full font-bold text-sm">1</div>
-<p class="text-black dark:text-white/80">Scan or take clear photos of your handwritten work.</p>
-</div>
-<div class="flex items-start gap-3">
-<div class="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-primary/10 text-primary rounded-full font-bold text-sm">2</div>
-<p class="text-black dark:text-white/80">Combine all images into a single PDF document.</p>
-</div>
-<div class="flex items-start gap-3">
-<div class="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-primary/10 text-primary rounded-full font-bold text-sm">3</div>
-<p class="text-black dark:text-white/80">Upload the PDF file to the 'Math 101' course portal.</p>
-</div>
-</div>
-</section>
-
-<div class="pt-4">
-<button class="w-full h-12 px-6 text-white font-bold bg-primary rounded-lg shadow-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 transition-colors">
-                        Mark as Complete
-                    </button>
-</div>
-</main>
-<footer class="sticky bottom-0 bg-background-light dark:bg-background-dark border-t border-black/10 dark:border-white/10">
-<nav class="flex justify-around p-2">
-<!-- Dashboard Link -->
-<a class="flex flex-col items-center justify-center w-1/4 p-2 text-black/60 dark:text-white/60 hover:text-primary dark:hover:text-primary transition-colors" href="dashboard.html">
-<svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
-<path d="M218.83,103.77l-80-75.48a1.14,1.14,0,0,1-.11-.11,16,16,0,0,0-21.53,0l-.11.11L37.17,103.77A16,16,0,0,0,32,115.55V208a16,16,0,0,0,16,16H96a16,16,0,0,0,16-16V160h32v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V115.55A16,16,0,0,0,218.83,103.77ZM208,208H160V160a16,16,0,0,0-16-16H112a16,16,0,0,0-16,16v48H48V115.55l.11-.1L128,40l79.9,75.43.11.1Z"></path>
-</svg>
-<span class="text-xs font-medium mt-1">Dashboard</span>
-</a>
-<!-- Assignments Link (Active) -->
-<a class="flex flex-col items-center justify-center w-1/4 p-2 text-primary dark:text-primary rounded-lg bg-primary/10 dark:bg-primary/20" href="assignments.html">
-<svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
-<path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H156.69A15.92,15.92,0,0,0,168,219.31L219.31,168A15.92,15.92,0,0,0,224,156.69V48A16,16,0,0,0,208,32ZM96,88h64a8,8,0,0,1,0,16H96a8,8,0,0,1,0-16Zm32,80H96a8,8,0,0,1,0-16h32a8,8,0,0,1,0,16ZM96,136a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm64,68.69V160h44.7Z"></path>
-</svg>
-<span class="text-xs font-medium mt-1">Assignments</span>
-</a>
-<!-- Calendar Link -->
-<a class="flex flex-col items-center justify-center w-1/4 p-2 text-black/60 dark:text-white/60 hover:text-primary dark:hover:text-primary transition-colors" href="index.html">
-<svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
-<path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-96-88v64a8,8,0,0,1-16,0V132.94l-4.42,2.22a8,8,0,0,1-7.16-14.32l16-8A8,8,0,0,1,112,120Zm59.16,30.45L152,176h16a8,8,0,0,1,0,16H136a8,8,0,0,1-6.4-12.8l28.78-38.37A8,8,0,1,0,145.07,132a8,8,0,1,1-13.85-8A24,24,0,0,1,176,136,23.76,23.76,0,0,1,171.16,150.45Z"></path>
-</svg>
-<span class="text-xs font-medium mt-1">Calendar</span>
-</a>
-<!-- Settings Link -->
-<a class="flex flex-col items-center justify-center w-1/4 p-2 text-black/60 dark:text-white/60 hover:text-primary dark:hover:text-primary transition-colors" href="settings.html">
-<svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
-<path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"></path>
-</svg>
-<span class="text-xs font-medium mt-1">Settings</span>
-</a>
-</nav>
-</footer>
-</div>
-
-</body></html>
