@@ -132,7 +132,7 @@
         <!-- Footer (Action Button) -->
         <footer class="p-4 border-t border-input-light dark:border-input-dark">
             <button id="create-assignment-button" class="w-full bg-primary text-white font-bold h-12 rounded-lg text-base tracking-wide transition-colors disabled:bg-primary/50 disabled:cursor-not-allowed" disabled>
-                Create Assignment
+                Initializing...
             </button>
         </footer>
     </div>
@@ -204,6 +204,7 @@
         async function initializeFirebase() {
             if (!firebaseConfig) {
                 showMessage("Database configuration missing.", "error");
+                createButton.textContent = 'Configuration Error';
                 return;
             }
 
@@ -220,19 +221,28 @@
 
                 isAuthReady = true;
                 console.log("Firebase initialized and ready.");
-                // Immediately check validation status after auth, in case a user reloads with data already entered
+                
+                // Once authenticated, set the button text and check form validity.
+                createButton.textContent = 'Create Assignment';
                 checkFormValidity();
                 
             } catch (error) {
                 console.error("Firebase initialization or authentication error:", error);
                 showMessage("Authentication failed. Cannot save assignment.", "error");
+                createButton.textContent = 'Auth Failed';
             }
         }
 
         /**
          * Checks if required fields are filled and toggles button state.
+         * Only runs if the app is ready.
          */
         function checkFormValidity() {
+            if (!isAuthReady) {
+                createButton.disabled = true;
+                return;
+            }
+
             const isTitleFilled = titleInput.value.trim().length > 0;
             const isClassSelected = classSelect.value.trim().length > 0;
             const isDueDateSet = dueDateInput.value.trim().length > 0;
@@ -247,19 +257,21 @@
          */
         async function handleCreateAssignment() {
             if (!isAuthReady) {
+                // Should not happen if button is properly disabled, but good fallback
                 showMessage("App is not ready. Please wait for initialization.", "error");
                 return;
             }
-
-            // Disable button during submission to prevent duplicates
-            createButton.disabled = true;
-            createButton.textContent = 'Saving...';
 
             // Re-check validity before saving
             if (createButton.disabled) {
                 showMessage("Please fill out all required fields.", "error");
                 return;
             }
+
+            // Disable button during submission to prevent duplicates
+            createButton.disabled = true;
+            const originalText = createButton.textContent;
+            createButton.textContent = 'Saving...';
 
             const assignmentData = {
                 title: titleInput.value.trim(),
@@ -286,7 +298,7 @@
                 console.error("Error creating assignment:", error);
                 showMessage("Failed to create assignment. Please try again.", "error");
                 createButton.disabled = false;
-                createButton.textContent = 'Create Assignment';
+                createButton.textContent = originalText;
             }
         }
         
