@@ -146,9 +146,21 @@
         // Set log level for debugging
         setLogLevel('Debug');
 
-        // Global Firebase variables provided by the environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        // --- Mock Configuration for functionality testing ---
+        // If the environment variables are not provided, we use this mock configuration
+        const MOCK_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyB_MOCK_API_KEY",
+            authDomain: "mock-project.firebaseapp.com",
+            projectId: "mock-project-id",
+            storageBucket: "mock-project.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:mockwebhash"
+        };
+        // --- End Mock Configuration ---
+
+        // Global Firebase variables provided by the environment or fallback to mock data
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'MOCK-APP-ID';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : MOCK_FIREBASE_CONFIG;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         let db;
@@ -202,17 +214,13 @@
          * Initializes Firebase and authenticates the user.
          */
         async function initializeFirebase() {
-            if (!firebaseConfig) {
-                showMessage("Database configuration missing.", "error");
-                createButton.textContent = 'Configuration Error';
-                return;
-            }
-
+            // NOTE: firebaseConfig is guaranteed to be set due to the mock fallback.
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
+                // Sign in using provided token or anonymously
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
@@ -220,7 +228,7 @@
                 }
 
                 isAuthReady = true;
-                console.log("Firebase initialized and ready.");
+                console.log("Firebase initialized and ready. Using public data collection path.");
                 
                 // Once authenticated, set the button text and check form validity.
                 createButton.textContent = 'Create Assignment';
@@ -228,7 +236,7 @@
                 
             } catch (error) {
                 console.error("Firebase initialization or authentication error:", error);
-                showMessage("Authentication failed. Cannot save assignment.", "error");
+                showMessage("Database Initialization Failed. Check console for details.", "error", 0);
                 createButton.textContent = 'Auth Failed';
             }
         }
@@ -257,7 +265,6 @@
          */
         async function handleCreateAssignment() {
             if (!isAuthReady) {
-                // Should not happen if button is properly disabled, but good fallback
                 showMessage("App is not ready. Please wait for initialization.", "error");
                 return;
             }
@@ -283,6 +290,7 @@
                 createdAt: new Date().toISOString(),
             };
 
+            // Use the public collection path for shared assignments
             const assignmentsCol = collection(db, `artifacts/${appId}/public/data/assignments`);
 
             try {
