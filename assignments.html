@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Your Assignments</title>
+    <title>My Assignments</title>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script>
         // Tailwind Configuration
         tailwind.config = {
@@ -21,12 +21,17 @@
                         "background-dark": "#101922",
                         "card-light": "#ffffff",
                         "card-dark": "#1b2734",
-                        "accent-red": "#ef4444",
-                        "accent-green": "#10b981",
-                        "accent-blue": "#3b82f6",
+                        "input-light": "#eef1f4",
+                        "input-dark": "#2a3b4c",
+                        "tag-creative": "#4ade80", // Green
+                        "tag-test-prep": "#f87171", // Red
+                        "tag-online-weekly": "#38bdf8", // Sky Blue
+                        "tag-reading": "#fbbf24", // Amber
+                        "tag-project": "#a78bfa", // Violet
+                        "tag-other": "#9ca3af", // Gray
                     },
                     fontFamily: {
-                        "display": ["Lexend", "sans-serif"]
+                        "display": ["Lexend"]
                     },
                     borderRadius: {
                         "DEFAULT": "0.25rem",
@@ -49,592 +54,671 @@
             'GRAD' 0,
             'opsz' 24
         }
-        /* Custom scrollbar style for better aesthetics */
-        main::-webkit-scrollbar {
-            width: 8px;
+        /* Custom modal transition styles */
+        .modal-enter-active, .modal-leave-active {
+            transition: opacity 0.3s ease;
         }
-        main::-webkit-scrollbar-track {
-            background: theme('colors.background-light');
+        .modal-enter-from, .modal-leave-to {
+            opacity: 0;
         }
-        main::-webkit-scrollbar-thumb {
-            background: theme('colors.primary');
-            border-radius: 4px;
+        .modal-enter-active .modal-content, .modal-leave-active .modal-content {
+            transition: transform 0.3s ease;
         }
-        .task-checkbox:checked + .task-label {
-            text-decoration: line-through;
-            color: theme('colors.slate.400');
+        .modal-enter-from .modal-content, .modal-leave-to .modal-content {
+            transform: translateY(100%);
         }
+        .tag-pill {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 9999px;
+            color: #101922; /* Always dark text for contrast on bright pills */
+            text-transform: uppercase;
+        }
+        .tag-creative { background-color: #4ade80; }
+        .tag-test-prep { background-color: #f87171; }
+        .tag-online-weekly { background-color: #38bdf8; }
+        .tag-reading { background-color: #fbbf24; }
+        .tag-project { background-color: #a78bfa; }
+        .tag-other { background-color: #d1d5db; }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 flex flex-col min-h-screen">
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
+    <div class="flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="bg-background-light dark:bg-background-dark sticky top-0 z-10 shadow-sm border-b border-slate-200 dark:border-slate-700">
+            <div class="p-4 flex items-center justify-between">
+                <h1 class="text-xl font-bold text-slate-900 dark:text-white">All Assignments</h1>
+                <a href="add-assignments.html" class="p-1.5 bg-primary text-white rounded-lg shadow-md hover:bg-blue-600 transition-colors">
+                    <span class="material-symbols-outlined text-2xl">add</span>
+                </a>
+            </div>
+        </header>
 
-    <!-- Confirmation Modal (Hidden by default) -->
-    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
-        <div class="bg-card-light dark:bg-card-dark rounded-xl p-6 shadow-2xl w-full max-w-sm">
-            <h3 class="text-lg font-bold mb-3">Confirm Deletion</h3>
-            <p id="modal-text" class="text-sm text-slate-600 dark:text-slate-300 mb-6">Are you sure you want to delete this assignment?</p>
-            <div class="flex justify-end space-x-3">
-                <button id="modal-cancel" class="px-4 py-2 text-sm font-medium rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">Cancel</button>
-                <button id="modal-confirm" class="px-4 py-2 text-sm font-medium rounded-lg bg-accent-red text-white hover:bg-red-600">Delete</button>
+        <!-- Loading Indicator & Connection Status -->
+        <div id="loading-indicator" class="p-4 text-center">
+            <span class="text-slate-500 dark:text-slate-400">Loading assignments...</span>
+        </div>
+        <div id="connection-status" class="mx-4 mt-2 p-2 rounded-lg text-sm text-center font-medium"></div>
+
+        <!-- Filter Buttons -->
+        <div class="flex justify-start gap-2 p-4 pt-2 overflow-x-auto border-b border-slate-200 dark:border-slate-700">
+            <button data-filter="All" class="filter-btn bg-primary text-white text-sm px-4 py-2 rounded-full font-medium shadow-md">All</button>
+            <button data-filter="Upcoming" class="filter-btn bg-card-light dark:bg-card-dark text-slate-700 dark:text-slate-200 text-sm px-4 py-2 rounded-full font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Upcoming</button>
+            <button data-filter="Completed" class="filter-btn bg-card-light dark:bg-card-dark text-slate-700 dark:text-slate-200 text-sm px-4 py-2 rounded-full font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Completed</button>
+        </div>
+
+        <!-- Assignment List -->
+        <main class="flex-1 px-4 py-4 space-y-3 overflow-y-auto">
+            <div id="assignment-list">
+                <!-- Assignments will be rendered here -->
+            </div>
+        </main>
+
+        <!-- Footer Navigation (Consistent with other pages) -->
+        <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
+            <nav class="flex justify-around p-2">
+                <!-- Dashboard Link -->
+                <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="dashboard.html">
+                    <span class="material-symbols-outlined">home</span>
+                    <span class="text-xs font-medium">Dashboard</span>
+                </a>
+                <!-- Assignments Link (Active) -->
+                <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="assignments.html">
+                    <span class="material-symbols-outlined">list_alt</span>
+                    <span class="text-xs font-medium">Assignments</span>
+                </a>
+                <!-- Calendar Link -->
+                <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="index.html">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    <span class="text-xs font-medium">Calendar</span>
+                </a>
+                <!-- Settings Link -->
+                <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="settings.html">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span class="text-xs font-medium">Settings</span>
+                </a>
+            </nav>
+        </footer>
+
+        <!-- Detail/Edit Modal -->
+        <div id="detail-modal-wrapper" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 modal-enter-from" onclick="hideDetailView()">
+            <div class="absolute bottom-0 w-full modal-content" onclick="event.stopPropagation()">
+                <div id="detail-modal" class="bg-card-light dark:bg-card-dark rounded-t-xl p-6 shadow-2xl transition-transform transform translate-y-full">
+                    <!-- Detail/Edit content will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal (Delete) -->
+        <div id="confirm-modal-wrapper" class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 items-center justify-center" onclick="hideConfirmModal()">
+            <div class="bg-card-light dark:bg-card-dark rounded-xl p-6 shadow-2xl w-11/12 max-w-sm" onclick="event.stopPropagation()">
+                <h3 class="text-xl font-bold mb-4">Confirm Deletion</h3>
+                <p id="confirm-message" class="text-slate-600 dark:text-slate-400 mb-6">Are you sure you want to delete this assignment?</p>
+                <div class="flex justify-end space-x-3">
+                    <button class="px-4 py-2 text-sm font-medium rounded-lg text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors" onclick="hideConfirmModal()">Cancel</button>
+                    <button id="confirm-delete-btn" class="px-4 py-2 text-sm font-medium rounded-lg text-white bg-red-500 hover:bg-red-600 transition-colors">Delete</button>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- Header -->
-    <header class="bg-card-light dark:bg-card-dark sticky top-0 z-10 shadow-md border-b border-slate-200 dark:border-slate-700">
-        <div class="p-4 flex items-center justify-between">
-            <h1 class="text-xl font-bold text-slate-900 dark:text-white">Assignments</h1>
-            <a href="add-assignments.html" class="p-2 text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors">
-                <span class="material-symbols-outlined text-2xl">add_circle</span>
-            </a>
-        </div>
-        <!-- Filter Tabs -->
-        <div class="flex justify-center border-t border-slate-200 dark:border-slate-700 p-2 space-x-2">
-            <button data-filter="all" class="filter-button px-4 py-1.5 text-sm font-medium rounded-full bg-primary text-white transition-colors">All</button>
-            <button data-filter="upcoming" class="filter-button px-4 py-1.5 text-sm font-medium rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">Upcoming</button>
-            <button data-filter="completed" class="filter-button px-4 py-1.5 text-sm font-medium rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">Completed</button>
-        </div>
-    </header>
-
-    <!-- Message Box for Feedback -->
-    <div id="message-box" class="mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 hidden"></div>
-
-    <!-- Assignment Detail View (Hidden by default) -->
-    <section id="detail-view" class="p-4 bg-background-light dark:bg-background-dark hidden flex-col space-y-4">
-        <button id="close-detail" class="text-primary self-start flex items-center text-sm font-medium">
-            <span class="material-symbols-outlined text-lg">arrow_back</span> Back to List
-        </button>
-        <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg space-y-4">
-            <h2 id="detail-title" class="text-3xl font-bold text-slate-900 dark:text-white"></h2>
-            <div class="flex flex-wrap gap-2 text-sm font-medium">
-                <span id="detail-class" class="px-3 py-1 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200"></span>
-                <span id="detail-priority" class="px-3 py-1 rounded-full text-white"></span>
-            </div>
-            <p id="detail-due" class="text-lg font-medium text-slate-600 dark:text-slate-300 border-b border-slate-100 dark:border-slate-700 pb-3"></p>
-            <div>
-                <h3 class="text-sm font-semibold uppercase tracking-wider text-primary mb-2">Description</h3>
-                <p id="detail-description" class="text-slate-700 dark:text-slate-200 leading-relaxed italic"></p>
-            </div>
-
-            <div class="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-700">
-                <label class="flex items-center space-x-3 cursor-pointer">
-                    <input id="detail-completed-checkbox" type="checkbox" class="h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary bg-input-light dark:bg-input-dark">
-                    <span id="detail-completed-label" class="text-base font-medium">Mark as Complete</span>
-                </label>
-                <button id="delete-assignment" class="flex items-center text-accent-red hover:text-red-700 transition-colors">
-                    <span class="material-symbols-outlined text-xl">delete</span>
-                    <span class="text-sm font-medium ml-1">Delete</span>
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Assignment List View -->
-    <main id="list-view" class="flex-1 p-4 overflow-y-auto space-y-4">
-        <div id="loading-indicator" class="flex justify-center items-center py-8">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span>Connecting to storage...</span>
-        </div>
-        
-        <div id="assignment-list" class="space-y-3">
-            <!-- Assignment Cards will be injected here -->
-        </div>
-
-        <p id="empty-list-message" class="text-center text-slate-500 dark:text-slate-400 p-8 hidden">No assignments match this filter. Try adding one!</p>
-    </main>
-
-    <!-- Footer Navigation (Consistent with other pages) -->
-    <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
-        <nav class="flex justify-around p-2">
-            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="dashboard.html">
-                <span class="material-symbols-outlined">home</span>
-                <span class="text-xs font-medium">Dashboard</span>
-            </a>
-            <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="assignments.html">
-                <span class="material-symbols-outlined">list_alt</span>
-                <span class="text-xs font-medium">Assignments</span>
-            </a>
-            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="index.html">
-                <span class="material-symbols-outlined">calendar_month</span>
-                <span class="text-xs font-medium">Calendar</span>
-            </a>
-            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="settings.html">
-                <span class="material-symbols-outlined">settings</span>
-                <span class="text-xs font-medium">Settings</span>
-            </a>
-        </nav>
-    </footer>
 
     <!-- Firebase and Application Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, query, setLogLevel, doc, updateDoc, deleteDoc, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, doc, updateDoc, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Set log level for debugging
         setLogLevel('Debug');
 
+        // Global Firebase variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        let db = null;
+        let db;
+        let auth;
         let isAuthReady = false;
         let isLocalMode = false;
-        const LOCAL_STORAGE_KEY = `academicPlanner_assignments_${appId}`;
-        let currentAssignments = [];
-        let currentFilter = 'all';
+        let currentFilter = 'All'; // State for filtering
 
         // UI elements
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const assignmentList = document.getElementById('assignment-list');
-        const emptyListMessage = document.getElementById('empty-list-message');
-        const messageBox = document.getElementById('message-box');
-        const filterButtons = document.querySelectorAll('.filter-button');
-        const listView = document.getElementById('list-view');
-        const detailView = document.getElementById('detail-view');
-        const detailTitle = document.getElementById('detail-title');
-        const detailClass = document.getElementById('detail-class');
-        const detailPriority = document.getElementById('detail-priority');
-        const detailDue = document.getElementById('detail-due');
-        const detailDescription = document.getElementById('detail-description');
-        const detailCompletedCheckbox = document.getElementById('detail-completed-checkbox');
-        const deleteAssignmentButton = document.getElementById('delete-assignment');
-        const closeDetailButton = document.getElementById('close-detail');
-        const modal = document.getElementById('confirmation-modal');
-        const modalConfirmButton = document.getElementById('modal-confirm');
-        const modalCancelButton = document.getElementById('modal-cancel');
-        let currentAssignmentId = null;
+        const loadingIndicatorEl = document.getElementById('loading-indicator');
+        const assignmentListEl = document.getElementById('assignment-list');
+        const connectionStatusEl = document.getElementById('connection-status');
+        const detailModalWrapperEl = document.getElementById('detail-modal-wrapper');
+        const detailModalEl = document.getElementById('detail-modal');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const confirmModalWrapperEl = document.getElementById('confirm-modal-wrapper');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
 
-        // Constants
-        const PRIORITY_COLOR_MAP = {
-            'High': 'bg-red-500',
-            'Medium': 'bg-orange-500',
-            'Low': 'bg-slate-500',
-        };
-        const PRIORITY_ORDER = { 'High': 3, 'Medium': 2, 'Low': 1 };
+        // --- Data Definitions ---
+        const TAG_OPTIONS = [
+            { value: "Creative", label: "Creative" },
+            { value: "Test Preparation", label: "Test Preparation" },
+            { value: "Online Weekly", label: "Online Weekly" },
+            { value: "Reading", label: "Reading" },
+            { value: "Project", label: "Project" },
+            { value: "Other", label: "Other" }
+        ];
 
+        const PRIORITY_OPTIONS = [
+            { value: "Low", label: "Low" },
+            { value: "Medium", label: "Medium" },
+            { value: "High", label: "High" }
+        ];
+        
+        const COURSE_OPTIONS = [
+            { value: "Mathematics", label: "Mathematics" },
+            { value: "Science", label: "Science" },
+            { value: "History", label: "History" },
+            { value: "English", label: "English" },
+            { value: "Art", label: "Art" },
+            { value: "Other", label: "Other" }
+        ];
 
-        /**
-         * Utility function to display messages.
-         */
-        function showMessage(message, type, duration = 3000) {
-            let bgColor, textColor;
-            switch (type) {
-                case 'success':
-                    bgColor = 'bg-green-100 dark:bg-green-900';
-                    textColor = 'text-green-700 dark:text-green-300';
-                    break;
-                case 'error':
-                    bgColor = 'bg-red-100 dark:bg-red-900';
-                    textColor = 'text-red-700 dark:text-red-300';
-                    break;
-                case 'info':
-                    bgColor = 'bg-blue-100 dark:bg-blue-900';
-                    textColor = 'text-blue-700 dark:text-blue-300';
-                    break;
-                default:
-                    bgColor = 'bg-gray-100 dark:bg-gray-700';
-                    textColor = 'text-gray-800 dark:text-gray-200';
-            }
+        // --- Utility Functions ---
 
-            messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
-            messageBox.innerHTML = message;
-            messageBox.classList.remove('hidden');
-
-            if (duration > 0) {
-                setTimeout(() => {
-                    messageBox.classList.add('opacity-0');
-                    setTimeout(() => messageBox.classList.add('hidden', 'opacity-100'), 300);
-                }, duration);
+        function getTagClass(tag) {
+            switch (tag) {
+                case 'Creative': return 'tag-creative';
+                case 'Test Preparation': return 'tag-test-prep';
+                case 'Online Weekly': return 'tag-online-weekly';
+                case 'Reading': return 'tag-reading';
+                case 'Project': return 'tag-project';
+                default: return 'tag-other';
             }
         }
 
-        /* --- LOCAL STORAGE FUNCTIONS --- */
+        function getPriorityClass(priority) {
+            switch (priority) {
+                case 'High': return 'bg-red-500';
+                case 'Medium': return 'bg-orange-500';
+                default: return 'bg-slate-500';
+            }
+        }
 
-        /**
-         * Reads all assignments from local storage.
-         */
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            if (isNaN(date)) return 'N/A';
+            return date.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        // --- Local Storage Functions (Fallback) ---
+
+        const LOCAL_STORAGE_KEY = 'academic_assignments';
+
         function getAssignmentsFromLocal() {
             try {
                 const data = localStorage.getItem(LOCAL_STORAGE_KEY);
                 return data ? JSON.parse(data) : [];
-            } catch (error) {
-                console.error("Error reading from local storage:", error);
+            } catch (e) {
+                console.error("Error reading local storage:", e);
                 return [];
             }
         }
 
-        /**
-         * Saves the entire assignments array back to local storage.
-         */
         function saveAssignmentsToLocal(assignments) {
             try {
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(assignments));
-            } catch (error) {
-                console.error("Error writing to local storage:", error);
-                showMessage("Warning: Failed to save changes locally.", "error");
-            }
-        }
-        
-        /**
-         * Local Mode Realtime Listener (simple manual refresh)
-         */
-        function startLocalModeListener() {
-            loadingIndicator.classList.add('hidden');
-            
-            // Initial load from local storage
-            currentAssignments = getAssignmentsFromLocal();
-            renderAssignments();
-
-            // Setup listener for hash changes (for detail view)
-            window.addEventListener('hashchange', checkUrlForDetailView);
-
-            // Since we can't do a true snapshot listener, we rely on manual re-renders
-            // after every CUD operation and on page load/hash change.
-        }
-
-        /**
-         * Toggles completion status in Local Mode.
-         */
-        function toggleCompletionLocal(assignmentId) {
-            const index = currentAssignments.findIndex(a => a.id === assignmentId);
-            if (index > -1) {
-                currentAssignments[index].isCompleted = !currentAssignments[index].isCompleted;
-                saveAssignmentsToLocal(currentAssignments);
-                showMessage(`Assignment marked as ${currentAssignments[index].isCompleted ? 'Complete' : 'Incomplete'}.`, 'success');
-                // Re-render to reflect change
-                renderAssignments(); 
-                // Render detail view if it's currently open
-                if (currentAssignmentId) checkUrlForDetailView();
+                // Manually trigger render after save in local mode
+                renderAssignments(filterAssignments(assignments, currentFilter));
+            } catch (e) {
+                console.error("Error writing to local storage:", e);
             }
         }
 
-        /**
-         * Deletes an assignment in Local Mode.
-         */
-        function deleteAssignmentLocal(assignmentId) {
-            currentAssignments = currentAssignments.filter(a => a.id !== assignmentId);
-            saveAssignmentsToLocal(currentAssignments);
-            showMessage('Assignment deleted successfully.', 'success');
-            // Re-render and close detail view
-            renderAssignments();
-            hideDetailView();
+        function updateAssignmentInLocal(id, updates) {
+            const assignments = getAssignmentsFromLocal();
+            const index = assignments.findIndex(a => a.id === id);
+            if (index !== -1) {
+                assignments[index] = { ...assignments[index], ...updates };
+                saveAssignmentsToLocal(assignments);
+            }
         }
 
-        /* --- FIREBASE FUNCTIONS --- */
+        function deleteAssignmentInLocal(id) {
+            const assignments = getAssignmentsFromLocal();
+            const updatedAssignments = assignments.filter(a => a.id !== id);
+            saveAssignmentsToLocal(updatedAssignments);
+        }
 
-        /**
-         * Returns the Firestore collection path for public assignments.
-         */
+        // --- Firestore Functions ---
+
         function getAssignmentsCollection() {
-            if (!db || !isAuthReady) return null;
+            if (!db || !isAuthReady || isLocalMode) return null;
+            // Public collection path for shared data
             return collection(db, `artifacts/${appId}/public/data/assignments`);
         }
 
-        /**
-         * Sets up the real-time listener for Firestore assignments.
-         */
-        function startFirestoreListener() {
-            const assignmentsCol = getAssignmentsCollection();
-            if (!assignmentsCol) return;
-
-            const q = query(assignmentsCol);
-
-            onSnapshot(q, (snapshot) => {
-                loadingIndicator.classList.add('hidden');
-                currentAssignments = [];
-                snapshot.forEach(doc => {
-                    currentAssignments.push({ id: doc.id, ...doc.data() });
-                });
-                renderAssignments();
-                checkUrlForDetailView(); // Check if a detail view needs to be opened/updated
-            }, (error) => {
-                console.error("Firestore snapshot error:", error);
-                showMessage("Error loading data from database.", "error");
-            });
-            window.addEventListener('hashchange', checkUrlForDetailView);
-        }
-
-        /**
-         * Toggles completion status in Firestore Mode.
-         */
-        async function toggleCompletionFirestore(assignmentId, newStatus) {
-            const assignmentRef = doc(db, `artifacts/${appId}/public/data/assignments`, assignmentId);
+        async function updateAssignmentInFirestore(id, updates) {
             try {
-                await updateDoc(assignmentRef, { isCompleted: newStatus });
-                showMessage(`Assignment marked as ${newStatus ? 'Complete' : 'Incomplete'}.`, 'success');
+                const docRef = doc(db, `artifacts/${appId}/public/data/assignments`, id);
+                await updateDoc(docRef, updates);
+                console.log("Assignment updated successfully:", id);
             } catch (error) {
-                console.error("Firestore update error:", error);
-                showMessage("Failed to update assignment status.", "error");
-            }
-        }
-        
-        /**
-         * Deletes an assignment in Firestore Mode.
-         */
-        async function deleteAssignmentFirestore(assignmentId) {
-            try {
-                const assignmentRef = doc(db, `artifacts/${appId}/public/data/assignments`, assignmentId);
-                await deleteDoc(assignmentRef);
-                showMessage('Assignment deleted successfully.', 'success');
-                hideDetailView();
-            } catch (error) {
-                console.error("Firestore delete error:", error);
-                showMessage("Failed to delete assignment.", "error");
+                console.error("Error updating assignment:", error);
+                alert("Failed to update assignment. Check console for details.");
             }
         }
 
-        /* --- CORE RENDERING FUNCTIONS --- */
+        async function deleteAssignmentInFirestore(id) {
+            try {
+                const docRef = doc(db, `artifacts/${appId}/public/data/assignments`, id);
+                await deleteDoc(docRef);
+                console.log("Assignment deleted successfully:", id);
+            } catch (error) {
+                console.error("Error deleting assignment:", error);
+                alert("Failed to delete assignment. Check console for details.");
+            }
+        }
+
+        // --- Core Application Logic ---
 
         /**
-         * Filters and sorts the assignments, then calls the render function.
+         * Filters assignments based on the current UI filter.
          */
-        function renderAssignments() {
-            let filteredAssignments = [...currentAssignments];
-            
-            // 1. Filter
+        function filterAssignments(assignments, filter) {
             const now = new Date();
-            now.setHours(0, 0, 0, 0);
+            now.setHours(0, 0, 0, 0); // Normalize time for comparison
 
-            if (currentFilter === 'upcoming') {
-                filteredAssignments = filteredAssignments.filter(a => !a.isCompleted && new Date(a.dueDate) >= now);
-            } else if (currentFilter === 'completed') {
-                filteredAssignments = filteredAssignments.filter(a => a.isCompleted);
-            } else if (currentFilter === 'all') {
-                // If filter is 'all', show completed assignments at the bottom of the list
-                filteredAssignments = filteredAssignments.filter(a => !a.isCompleted || a.isCompleted);
+            let filtered = assignments;
+
+            if (filter === 'Upcoming') {
+                filtered = assignments.filter(a => !a.isCompleted && new Date(a.dueDate) >= now);
+            } else if (filter === 'Completed') {
+                filtered = assignments.filter(a => a.isCompleted);
             }
 
-            // 2. Sort
-            // Sort by priority (desc), then by due date (asc). Completed items are always last.
-            filteredAssignments.sort((a, b) => {
-                const completedA = a.isCompleted ? 1 : 0;
-                const completedB = b.isCompleted ? 1 : 0;
-
-                if (completedA !== completedB) return completedA - completedB; // Completed last
-
-                // Within incomplete/completed groups, sort by Priority then Date
-                const priorityA = PRIORITY_ORDER[a.priority] || 1;
-                const priorityB = PRIORITY_ORDER[b.priority] || 1;
-                if (priorityB !== priorityA) {
-                    return priorityB - priorityA; // High priority first
-                }
-                
-                return new Date(a.dueDate) - new Date(b.dueDate); // Earliest due date first
-            });
-
-            // 3. Render
-            assignmentList.innerHTML = '';
-            if (filteredAssignments.length === 0) {
-                emptyListMessage.classList.remove('hidden');
-            } else {
-                emptyListMessage.classList.add('hidden');
-                filteredAssignments.forEach(a => assignmentList.appendChild(createAssignmentCard(a)));
-            }
+            // Sort by due date (closest first)
+            return filtered.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
         }
-        
-        /**
-         * Creates a clickable card element for an assignment.
-         */
-        function createAssignmentCard(assignment) {
-            const card = document.createElement('div');
-            card.className = "flex items-center space-x-3 p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow cursor-pointer";
-            card.setAttribute('data-id', assignment.id);
-            card.onclick = () => showDetailView(assignment.id);
 
-            const priorityClass = PRIORITY_COLOR_MAP[assignment.priority] || PRIORITY_COLOR_MAP['Low'];
-            const dueDate = new Date(assignment.dueDate).toLocaleDateString(undefined, {
-                month: 'short', day: 'numeric', year: 'numeric'
-            });
+        /**
+         * Renders the list of assignments to the DOM.
+         */
+        function renderAssignments(assignments) {
+            assignmentListEl.innerHTML = '';
             
-            card.innerHTML = `
-                <div class="flex-shrink-0">
-                    <input type="checkbox" id="checkbox-${assignment.id}" class="task-checkbox h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary bg-input-light dark:bg-input-dark" ${assignment.isCompleted ? 'checked' : ''} onclick="event.stopPropagation(); window.toggleAssignmentCompletion('${assignment.id}', event.target.checked);">
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold truncate task-label" id="label-${assignment.id}">${assignment.title}</p>
-                    <p class="text-xs text-primary mt-0.5">${assignment.course}</p>
-                </div>
-                <div class="flex-shrink-0 text-right space-y-1">
-                    <span class="text-xs font-medium px-2 py-0.5 rounded-full text-white ${priorityClass}">${assignment.priority || 'Low'}</span>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">${dueDate}</p>
+            if (loadingIndicatorEl) {
+                loadingIndicatorEl.classList.add('hidden');
+            }
+
+            if (assignments.length === 0) {
+                const message = document.createElement('p');
+                message.className = 'text-center text-slate-500 dark:text-slate-400 p-6';
+                message.textContent = currentFilter === 'Completed' ? 'No assignments marked as completed.' : 'You have no assignments here yet. Use the "+" button to add one!';
+                assignmentListEl.appendChild(message);
+                return;
+            }
+
+            assignments.forEach(assignment => {
+                const card = document.createElement('div');
+                card.className = `flex items-center bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-md border border-slate-200 dark:border-slate-700 cursor-pointer transition-shadow hover:shadow-lg ${assignment.isCompleted ? 'opacity-70 line-through' : ''}`;
+                card.onclick = () => showDetailView(assignment.id);
+                
+                const dueDate = formatDate(assignment.dueDate);
+                const tagClass = getTagClass(assignment.tag);
+                const priorityClass = getPriorityClass(assignment.priority);
+
+                card.innerHTML = `
+                    <div class="flex-shrink-0 w-2 h-14 rounded-full mr-4 ${priorityClass}"></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-lg truncate">${assignment.title}</p>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">${assignment.course}</p>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <span class="tag-pill ${tagClass}">${assignment.tag || 'Other'}</span>
+                            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Due: ${dueDate}</span>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0 ml-4">
+                        <button class="text-primary hover:text-blue-600 p-2 rounded-full transition-colors" onclick="event.stopPropagation(); toggleCompletion('${assignment.id}', ${!assignment.isCompleted})">
+                            <span class="material-symbols-outlined">${assignment.isCompleted ? 'check_box' : 'check_box_outline_blank'}</span>
+                        </button>
+                    </div>
+                `;
+                assignmentListEl.appendChild(card);
+            });
+        }
+
+        /**
+         * Toggles the completion status of an assignment.
+         */
+        window.toggleCompletion = async function(id, isCompleted) {
+            const updates = { isCompleted: isCompleted };
+            
+            if (isLocalMode) {
+                updateAssignmentInLocal(id, updates);
+            } else {
+                await updateAssignmentInFirestore(id, updates);
+            }
+        };
+
+        // --- Detail View / Modal Logic ---
+
+        function renderDetailModal(assignment) {
+            const dueDate = assignment.dueDate; // YYYY-MM-DD format for input
+            const priorityClass = getPriorityClass(assignment.priority);
+            const tagClass = getTagClass(assignment.tag);
+
+            detailModalEl.innerHTML = `
+                <div id="detail-view" class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-extrabold truncate w-4/5">${assignment.title}</h2>
+                        <div class="flex space-x-2">
+                            <button class="text-slate-500 dark:text-slate-400 hover:text-red-500 transition-colors" onclick="showConfirmModal('${assignment.id}')">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                            <button class="text-primary hover:text-blue-600 transition-colors" onclick="switchToEditView('${assignment.id}')">
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+                            <button class="text-slate-500 dark:text-slate-400 hover:text-slate-300 transition-colors" onclick="hideDetailView()">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center text-lg">
+                        <span class="text-slate-500 dark:text-slate-400">Class:</span>
+                        <span class="font-medium">${assignment.course}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center text-lg">
+                        <span class="text-slate-500 dark:text-slate-400">Due Date:</span>
+                        <span class="font-medium">${formatDate(assignment.dueDate)}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center text-lg">
+                        <span class="text-slate-500 dark:text-slate-400">Priority:</span>
+                        <span class="px-3 py-1 rounded-full text-white text-sm font-medium ${priorityClass}">${assignment.priority}</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center text-lg">
+                        <span class="text-slate-500 dark:text-slate-400">Category:</span>
+                        <span class="tag-pill ${tagClass}">${assignment.tag}</span>
+                    </div>
+
+                    <h3 class="text-xl font-bold pt-4">Details</h3>
+                    <p class="text-slate-600 dark:text-slate-400 whitespace-pre-wrap">${assignment.description || 'No description provided.'}</p>
+                    
+                    <button class="w-full mt-6 px-4 py-3 text-sm font-medium rounded-lg text-white ${assignment.isCompleted ? 'bg-slate-500 hover:bg-slate-600' : 'bg-green-500 hover:bg-green-600'} transition-colors" onclick="toggleCompletion('${assignment.id}', ${!assignment.isCompleted}); hideDetailView()">
+                        Mark as ${assignment.isCompleted ? 'Uncomplete' : 'Complete'}
+                    </button>
                 </div>
             `;
-            return card;
+            detailModalWrapperEl.classList.remove('hidden');
         }
 
-        /**
-         * Public function to toggle assignment completion (called from checkbox onClick).
-         */
-        window.toggleAssignmentCompletion = function(assignmentId, newStatus) {
-            if (isLocalMode) {
-                toggleCompletionLocal(assignmentId);
-            } else {
-                toggleCompletionFirestore(assignmentId, newStatus);
-            }
+        function renderEditModal(assignment) {
+            const dueDate = assignment.dueDate;
+            
+            // Helper to generate <option> tags
+            const createOptions = (options, currentValue) => options.map(opt => 
+                `<option value="${opt.value}" ${opt.value === currentValue ? 'selected' : ''}>${opt.label}</option>`
+            ).join('');
+
+            detailModalEl.innerHTML = `
+                <form id="edit-form" class="space-y-4" onsubmit="handleEditSubmission(event, '${assignment.id}')">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-extrabold">Edit Assignment</h2>
+                        <button type="button" class="text-slate-500 dark:text-slate-400 hover:text-slate-300 transition-colors" onclick="hideDetailView()">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Title</label>
+                        <input id="edit-title" class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-12 px-4 focus:ring-2 focus:ring-primary" type="text" value="${assignment.title}" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Class</label>
+                        <select id="edit-class" class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-12 px-4 focus:ring-2 focus:ring-primary">
+                            ${createOptions(COURSE_OPTIONS, assignment.course)}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Due Date</label>
+                        <input id="edit-due-date" class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-12 px-4 focus:ring-2 focus:ring-primary" type="date" value="${dueDate}" required>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Priority</label>
+                        <select id="edit-priority" class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-12 px-4 focus:ring-2 focus:ring-primary">
+                            ${createOptions(PRIORITY_OPTIONS, assignment.priority)}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Category (Tag)</label>
+                        <select id="edit-tag" class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg h-12 px-4 focus:ring-2 focus:ring-primary">
+                            ${createOptions(TAG_OPTIONS, assignment.tag)}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Description</label>
+                        <textarea id="edit-description" class="w-full bg-input-light dark:bg-input-dark border-none rounded-lg p-4 focus:ring-2 focus:ring-primary" rows="4">${assignment.description || ''}</textarea>
+                    </div>
+
+                    <button type="submit" class="w-full mt-6 bg-primary text-white font-bold h-12 rounded-lg text-base tracking-wide hover:bg-blue-600 transition-colors">
+                        Save Changes
+                    </button>
+                </form>
+            `;
+            detailModalWrapperEl.classList.remove('hidden');
         }
-        
-        /**
-         * Switches the view to show assignment details.
-         */
-        function showDetailView(id) {
-            const assignment = currentAssignments.find(a => a.id === id);
+
+        window.showDetailView = async function(id) {
+            const assignment = isLocalMode 
+                ? getAssignmentsFromLocal().find(a => a.id === id)
+                : window.currentAssignments.find(a => a.id === id);
+                
             if (!assignment) {
-                showMessage("Assignment not found.", "error");
+                console.error("Assignment not found:", id);
                 return;
             }
             
-            // Set current state
-            currentAssignmentId = id;
+            renderDetailModal(assignment);
             
-            // FIX: Use window.location.hash directly to avoid SecurityError
-            window.location.hash = `detail=${id}`;
+            // Use location.hash for deep linking/state management
+            window.location.hash = `assignment=${id}`;
+        };
 
-            // Populate Details
-            const priorityClass = PRIORITY_COLOR_MAP[assignment.priority] || PRIORITY_COLOR_MAP['Low'];
-            const dueDate = new Date(assignment.dueDate).toLocaleDateString(undefined, {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-            });
+        window.switchToEditView = function(id) {
+            const assignment = isLocalMode 
+                ? getAssignmentsFromLocal().find(a => a.id === id)
+                : window.currentAssignments.find(a => a.id === id);
 
-            detailTitle.textContent = assignment.title;
-            detailClass.textContent = assignment.course;
-            detailPriority.textContent = assignment.priority || 'Low';
-            detailPriority.className = `px-3 py-1 rounded-full text-white ${priorityClass}`;
-            detailDue.textContent = `Due Date: ${dueDate}`;
-            detailDescription.textContent = assignment.description || 'No description provided.';
-            detailCompletedCheckbox.checked = assignment.isCompleted;
-            detailCompletedCheckbox.onchange = (e) => window.toggleAssignmentCompletion(id, e.target.checked);
+            if (assignment) {
+                renderEditModal(assignment);
+            }
+        };
 
-            // Show view
-            listView.classList.add('hidden');
-            detailView.classList.remove('hidden');
-        }
-        
-        /**
-         * Switches the view back to the list.
-         */
-        function hideDetailView() {
-            currentAssignmentId = null;
-            // FIX: Use window.location.hash directly to clear the hash and avoid SecurityError
+        window.hideDetailView = function() {
+            detailModalWrapperEl.classList.add('hidden');
+            // Remove the hash to clear the state
             window.location.hash = '';
+        };
+
+        window.handleEditSubmission = async function(event, id) {
+            event.preventDefault();
             
-            detailView.classList.add('hidden');
-            listView.classList.remove('hidden');
-            renderAssignments();
-        }
-        
-        /**
-         * Checks the URL hash on load or change to see if the detail view should be opened.
-         */
-        function checkUrlForDetailView() {
-            const hash = window.location.hash.substring(1);
-            const params = new URLSearchParams(hash);
-            const detailId = params.get('detail');
+            const updates = {
+                title: document.getElementById('edit-title').value,
+                course: document.getElementById('edit-class').value,
+                dueDate: document.getElementById('edit-due-date').value,
+                priority: document.getElementById('edit-priority').value,
+                tag: document.getElementById('edit-tag').value,
+                description: document.getElementById('edit-description').value,
+            };
 
-            if (detailId && currentAssignments.length > 0) {
-                // Ensure the assignment exists before trying to display it
-                if (currentAssignments.some(a => a.id === detailId)) {
-                    showDetailView(detailId);
-                } else {
-                    // If hash exists but ID is invalid/missing, clear the hash and hide detail view
-                    hideDetailView(); 
-                }
+            if (isLocalMode) {
+                updateAssignmentInLocal(id, updates);
             } else {
-                hideDetailView();
+                await updateAssignmentInFirestore(id, updates);
             }
-        }
+            
+            hideDetailView();
+        };
 
+        // --- Confirmation Modal Logic (Delete) ---
 
-        /* --- INITIALIZATION & EVENT LISTENERS --- */
+        let assignmentIdToDelete = null;
 
-        /**
-         * Initializes Firebase or falls back to Local Mode.
-         */
-        async function initializeFirebase() {
-            if (!firebaseConfig) {
-                isLocalMode = true;
-                console.warn("Firebase configuration missing. Switching to Local Mode.");
-                startLocalModeListener();
-                showMessage("Database connection missing. Data loaded from your browser's Local Storage.", "info", 5000);
+        window.showConfirmModal = function(id) {
+            assignmentIdToDelete = id;
+            const assignment = isLocalMode 
+                ? getAssignmentsFromLocal().find(a => a.id === id)
+                : window.currentAssignments.find(a => a.id === id);
+
+            if (assignment) {
+                document.getElementById('confirm-message').textContent = `Are you sure you want to delete "${assignment.title}"? This cannot be undone.`;
+            }
+            confirmModalWrapperEl.classList.remove('hidden');
+        };
+
+        window.hideConfirmModal = function() {
+            confirmModalWrapperEl.classList.add('hidden');
+            assignmentIdToDelete = null;
+        };
+
+        confirmDeleteBtn.onclick = async function() {
+            if (!assignmentIdToDelete) return;
+            
+            if (isLocalMode) {
+                deleteAssignmentInLocal(assignmentIdToDelete);
             } else {
-                try {
-                    const app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    const auth = getAuth(app);
-                    
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-
-                    isAuthReady = true;
-                    console.log("Firebase initialized and ready. Starting Firestore listener.");
-                    startFirestoreListener();
-                    
-                } catch (error) {
-                    console.error("Firebase initialization failed, falling back to Local Mode:", error);
-                    isLocalMode = true;
-                    isAuthReady = true;
-                    startLocalModeListener();
-                    showMessage("Database connection failed. Data loaded from Local Storage.", "info", 5000);
-                }
+                await deleteAssignmentInFirestore(assignmentIdToDelete);
             }
-        }
+            
+            hideConfirmModal();
+            hideDetailView(); // Close the detail view if it was open
+        };
 
-        // Global Delete Handler (triggered by modal confirm)
-        modalConfirmButton.onclick = () => {
-            if (currentAssignmentId) {
-                if (isLocalMode) {
-                    deleteAssignmentLocal(currentAssignmentId);
-                } else {
-                    deleteAssignmentFirestore(currentAssignmentId);
+
+        // --- Initialization and Data Listener ---
+
+        function setupDataListener() {
+            if (!isLocalMode) {
+                // Database Mode
+                const assignmentsCol = getAssignmentsCollection();
+                if (!assignmentsCol) {
+                    console.error("Assignments collection is null in setupDataListener. Fallback likely failed.");
+                    return; 
                 }
-            }
-            modal.classList.add('hidden');
-        };
 
-        // Modal Cancellation
-        modalCancelButton.onclick = () => {
-            modal.classList.add('hidden');
-        };
-        
-        // Delete button in detail view opens the modal
-        deleteAssignmentButton.onclick = () => {
-            modal.classList.remove('hidden');
-        };
-
-        // Close detail view button
-        closeDetailButton.onclick = hideDetailView;
-
-        // Filter button listeners
-        filterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // Update active class
-                filterButtons.forEach(btn => {
-                    btn.classList.remove('bg-primary', 'text-white');
-                    btn.classList.add('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-100', 'dark:hover:bg-slate-700');
+                // Firestore Real-time listener
+                const q = query(assignmentsCol);
+                onSnapshot(q, (snapshot) => {
+                    const assignments = [];
+                    snapshot.forEach(doc => {
+                        assignments.push({ id: doc.id, ...doc.data() });
+                    });
+                    window.currentAssignments = assignments; // Store globally for detail view lookups
+                    renderAssignments(filterAssignments(assignments, currentFilter));
+                }, (error) => {
+                    console.error("Error fetching assignments from Firestore:", error);
+                    // If Firestore fails during listen, we don't automatically fall back to Local Mode mid-session
                 });
-                button.classList.add('bg-primary', 'text-white');
-                button.classList.remove('text-slate-600', 'dark:text-slate-300', 'hover:bg-slate-100', 'dark:hover:bg-slate-700');
                 
-                // Update filter and re-render
-                currentFilter = button.getAttribute('data-filter');
-                renderAssignments();
+                connectionStatusEl.textContent = "Connected to Database (Shared)";
+                connectionStatusEl.classList.remove('text-slate-500', 'bg-red-200', 'dark:bg-red-900');
+                connectionStatusEl.classList.add('text-green-700', 'bg-green-200', 'dark:bg-green-900');
+            } else {
+                // Local Storage Mode
+                const assignments = getAssignmentsFromLocal();
+                window.currentAssignments = assignments;
+                renderAssignments(filterAssignments(assignments, currentFilter));
+                
+                connectionStatusEl.textContent = "Local Mode (Browser Storage)";
+                connectionStatusEl.classList.remove('text-slate-500', 'bg-green-200', 'dark:bg-green-900');
+                connectionStatusEl.classList.add('text-red-700', 'bg-red-200', 'dark:bg-red-900');
+            }
+        }
+
+        async function startApplication() {
+            try {
+                // Check if Firebase config is missing to activate Local Mode immediately
+                if (!firebaseConfig || !firebaseConfig.apiKey) {
+                    throw new Error("Firebase configuration missing. Switching to Local Mode.");
+                }
+
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                isAuthReady = true;
+                setupDataListener();
+
+            } catch (error) {
+                console.error("Firebase initialization failed, falling back to Local Mode:", error.message);
+                isLocalMode = true;
+                setupDataListener(); // Start the data listener in Local Mode
+            }
+        }
+        
+        // --- Event Listeners ---
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                // Update button styles
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('bg-primary', 'text-white', 'hover:bg-slate-200', 'dark:hover:bg-slate-700');
+                    btn.classList.add('bg-card-light', 'dark:bg-card-dark', 'text-slate-700', 'dark:text-slate-200', 'hover:bg-slate-200', 'dark:hover:bg-slate-700');
+                });
+                e.currentTarget.classList.remove('bg-card-light', 'dark:bg-card-dark', 'text-slate-700', 'dark:text-slate-200');
+                e.currentTarget.classList.add('bg-primary', 'text-white');
+                
+                // Apply filter
+                currentFilter = e.currentTarget.dataset.filter;
+                if (window.currentAssignments) {
+                    renderAssignments(filterAssignments(window.currentAssignments, currentFilter));
+                }
             });
         });
         
-        // Initialize the app on load
-        initializeFirebase();
-
-        // Handle Dark Mode preference on load
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.documentElement.classList.add('dark');
+        // Check URL hash for detail view on load
+        function checkUrlForDetailView() {
+            const hash = window.location.hash.substring(1);
+            if (hash.startsWith('assignment=')) {
+                const id = hash.split('=')[1];
+                // Wait for assignments to load before trying to display detail
+                const checkInterval = setInterval(() => {
+                    if (window.currentAssignments) {
+                        clearInterval(checkInterval);
+                        showDetailView(id);
+                    }
+                }, 100);
+            }
         }
-
+        
+        // Listen for hash changes
+        window.addEventListener('hashchange', () => {
+             // If hash is cleared, hide detail view (handled by hideDetailView)
+             if (window.location.hash === '') {
+                 // Do nothing, hideDetailView handles the hash clear
+             } else {
+                 checkUrlForDetailView();
+             }
+        });
+        
+        // Start the application
+        startApplication().then(() => {
+            checkUrlForDetailView();
+        });
     </script>
 </body>
 </html>
