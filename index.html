@@ -220,10 +220,15 @@
         }
 
         /**
-         * Formats a date string to YYYY-MM-DD for comparison.
+         * FIX: Creates a YYYY-MM-DD date string using local time components
+         * to match the format stored by the input field, avoiding timezone shifts.
          */
         function formatToDateKey(date) {
-            return date.toISOString().split('T')[0];
+            const y = date.getFullYear();
+            // Month is 0-indexed, so add 1
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
         }
 
         /**
@@ -252,7 +257,7 @@
                 // Ignore completed assignments
                 if (a.isCompleted) return; 
 
-                const dateKey = a.dueDate; // Assumes YYYY-MM-DD format from storage
+                const dateKey = a.dueDate; // YYYY-MM-DD format from storage
                 
                 if (!indicators[dateKey]) {
                     indicators[dateKey] = a.priority;
@@ -288,6 +293,7 @@
 
             // Fill in days of the month
             for (let day = 1; day <= monthLength; day++) {
+                // IMPORTANT: Create date using local time to ensure correct day calculation
                 const dayDate = new Date(date.getFullYear(), date.getMonth(), day);
                 const dayKey = formatToDateKey(dayDate);
                 const isToday = dayKey === todayKey;
@@ -420,7 +426,7 @@
                         ...doc.data(),
                         isCompleted: doc.data().isCompleted || false,
                         priority: doc.data().priority || 'Medium',
-                        dueDate: doc.data().dueDate || new Date().toISOString().split('T')[0]
+                        dueDate: doc.data().dueDate || formatToDateKey(new Date()) // Use safe format
                     }));
                     
                     handleDataUpdate(assignments);
@@ -431,7 +437,6 @@
                     connectionStatusEl.classList.remove('text-green-600');
                     connectionStatusEl.classList.add('text-orange-600', 'dark:text-orange-400');
                     // Fallback to local on connection error
-                    // Note: We don't re-run the listener setup, just handle the fallback UI status
                     handleDataUpdate(getAssignmentsFromLocal());
                 });
             }
@@ -468,7 +473,6 @@
 
             } catch (error) {
                 console.error("Firebase initialization failed, falling back to Local Mode:", error);
-                // Note: isLocalMode is true, but we still finalize the process
                 isAuthReady = true;
                 setupDataListener(); // This will execute the isLocalMode branch
             }
