@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Dashboard Overview</title>
+    <title>Academic Dashboard</title>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
@@ -49,6 +49,15 @@
             'GRAD' 0,
             'opsz' 24
         }
+        .priority-high {
+            border-left-color: theme('colors.accent-red');
+        }
+        .priority-medium {
+            border-left-color: theme('colors.primary');
+        }
+        .priority-low {
+            border-left-color: theme('colors.accent-green');
+        }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 flex flex-col min-h-screen">
@@ -56,66 +65,53 @@
     <!-- Header -->
     <header class="bg-card-light dark:bg-card-dark sticky top-0 z-10 shadow-md border-b border-slate-200 dark:border-slate-700">
         <div class="p-4 flex items-center justify-between">
-            <h1 class="text-xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
-            <a href="add-assignments.html" class="p-2 text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors">
-                <span class="material-symbols-outlined text-2xl">add_circle</span>
-            </a>
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white">Academic Dashboard</h1>
+            <p id="connection-status" class="text-xs font-medium text-slate-500 dark:text-slate-400">Loading...</p>
         </div>
     </header>
 
-    <!-- Message Box for Feedback -->
-    <div id="message-box" class="mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 hidden"></div>
-
     <!-- Main Content -->
     <main class="flex-1 p-4 overflow-y-auto space-y-6">
-        
-        <!-- User Welcome and Status -->
-        <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg">
-            <h2 id="greeting" class="text-2xl font-bold mb-2">Hello, Planner!</h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400">
-                You are currently logged in with ID: <span id="user-id-display" class="font-mono text-xs px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700">Loading...</span>
-            </p>
-            <p id="status-message" class="text-sm mt-3 text-primary font-medium">Connecting to your data...</p>
-        </div>
 
-        <!-- Key Metrics Section -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-            
-            <!-- Card 1: Upcoming Assignments -->
-            <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border-l-4 border-accent-blue">
-                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Upcoming</p>
-                <p id="upcoming-count" class="text-3xl font-bold mt-1 text-accent-blue">0</p>
+        <!-- Quick Stats Cards -->
+        <div class="grid grid-cols-3 gap-3">
+            <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-md text-center">
+                <p id="total-count" class="text-2xl font-bold text-primary">--</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Total</p>
             </div>
-
-            <!-- Card 2: Completed Today -->
-            <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border-l-4 border-accent-green">
-                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Completed</p>
-                <p id="completed-count" class="text-3xl font-bold mt-1 text-accent-green">0</p>
+            <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-md text-center">
+                <p id="upcoming-count" class="text-2xl font-bold text-accent-blue">--</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Upcoming</p>
             </div>
-
-            <!-- Card 3: Overdue -->
-            <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border-l-4 border-accent-red col-span-2 md:col-span-1">
-                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Overdue</p>
-                <p id="overdue-count" class="text-3xl font-bold mt-1 text-accent-red">0</p>
+            <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-md text-center">
+                <p id="completed-count" class="text-2xl font-bold text-accent-green">--</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Completed</p>
             </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="space-y-3 pt-4">
-            <h3 class="text-lg font-bold">Quick Actions</h3>
-            <a href="assignments.html" class="flex items-center justify-between p-4 bg-primary text-white rounded-xl shadow-md hover:bg-blue-600 transition-colors">
-                <span class="font-medium">View All Assignments</span>
-                <span class="material-symbols-outlined">arrow_forward</span>
-            </a>
-            <a href="add-assignments.html" class="flex items-center justify-between p-4 bg-card-light dark:bg-card-dark rounded-xl shadow-md border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
-                <span class="font-medium">Add New Assignment</span>
-                <span class="material-symbols-outlined text-primary">add</span>
-            </a>
         </div>
         
+        <!-- Quick Action: Add New Assignment -->
+        <a href="add-assignments.html" class="block">
+            <div class="bg-primary hover:bg-blue-600 transition-colors text-white p-4 rounded-xl shadow-lg flex items-center justify-center space-x-3 cursor-pointer">
+                <span class="material-symbols-outlined text-3xl">add_circle</span>
+                <span class="text-lg font-semibold">Add New Assignment</span>
+            </div>
+        </a>
+
+        <!-- Urgent Assignments Section -->
+        <section class="space-y-4">
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">Top 5 Urgent Tasks</h2>
+            <div id="urgent-assignments-list" class="space-y-3">
+                <!-- Assignments will be rendered here -->
+                <p class="text-center text-slate-500 dark:text-slate-400 p-4">Loading assignments...</p>
+            </div>
+        </section>
+        
+        <!-- Message Box for Feedback -->
+        <div id="message-box" class="mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 hidden"></div>
+
     </main>
 
-    <!-- Footer Navigation -->
+    <!-- Footer Navigation (Consistent with other pages) -->
     <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
         <nav class="flex justify-around p-2">
             <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="dashboard.html">
@@ -140,64 +136,31 @@
     <!-- Firebase and Application Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, query, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, query, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         setLogLevel('Debug');
 
+        // Global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
+        // Application State
         let db = null;
-        let isAuthReady = false;
         let isLocalMode = false;
+        let isAuthReady = false;
         const LOCAL_STORAGE_KEY = `academicPlanner_assignments_${appId}`;
+        const priorityOrder = { 'High': 1, 'Medium': 2, 'Low': 3 };
 
-        // UI elements
-        const userIdDisplay = document.getElementById('user-id-display');
-        const statusMessage = document.getElementById('status-message');
-        const upcomingCount = document.getElementById('upcoming-count');
-        const completedCount = document.getElementById('completed-count');
-        const overdueCount = document.getElementById('overdue-count');
-        
-        /**
-         * Utility function to display messages. (Reused from assignments.html)
-         */
-        function showMessage(message, type, duration = 3000) {
-            const messageBox = document.getElementById('message-box');
-            let bgColor, textColor;
-            switch (type) {
-                case 'success':
-                    bgColor = 'bg-green-100 dark:bg-green-900';
-                    textColor = 'text-green-700 dark:text-green-300';
-                    break;
-                case 'error':
-                    bgColor = 'bg-red-100 dark:bg-red-900';
-                    textColor = 'text-red-700 dark:text-red-300';
-                    break;
-                case 'info':
-                    bgColor = 'bg-blue-100 dark:bg-blue-900';
-                    textColor = 'text-blue-700 dark:text-blue-300';
-                    break;
-                default:
-                    bgColor = 'bg-gray-100 dark:bg-gray-700';
-                    textColor = 'text-gray-800 dark:text-gray-200';
-            }
+        // UI Elements
+        const totalCountEl = document.getElementById('total-count');
+        const upcomingCountEl = document.getElementById('upcoming-count');
+        const completedCountEl = document.getElementById('completed-count');
+        const urgentListEl = document.getElementById('urgent-assignments-list');
+        const connectionStatusEl = document.getElementById('connection-status');
 
-            messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
-            messageBox.innerHTML = message;
-            messageBox.classList.remove('hidden');
-
-            if (duration > 0) {
-                setTimeout(() => {
-                    messageBox.classList.add('opacity-0');
-                    setTimeout(() => messageBox.classList.add('hidden', 'opacity-100'), 300);
-                }, duration);
-            }
-        }
-
-        /* --- FIREBASE/LOCAL DATA FUNCTIONS --- */
+        /* --- UTILITY FUNCTIONS --- */
 
         /**
          * Reads all assignments from local storage.
@@ -213,65 +176,122 @@
         }
         
         /**
-         * Updates the UI with counts based on the assignment list.
+         * Formats a date string for display.
          */
-        function updateDashboardMetrics(assignments) {
-            const now = new Date();
-            now.setHours(0, 0, 0, 0);
-
-            let upcoming = 0;
-            let completed = 0;
-            let overdue = 0;
-
-            assignments.forEach(a => {
-                if (a.isCompleted) {
-                    completed++;
-                } else {
-                    const dueDate = new Date(a.dueDate);
-                    if (dueDate < now) {
-                        overdue++;
-                    } else {
-                        upcoming++;
-                    }
-                }
-            });
-
-            upcomingCount.textContent = upcoming;
-            completedCount.textContent = completed;
-            overdueCount.textContent = overdue;
-        }
-
-        /**
-         * Sets up the real-time listener for Firestore assignments.
-         */
-        function startFirestoreListener() {
-            const assignmentsCol = collection(db, `artifacts/${appId}/public/data/assignments`);
-
-            onSnapshot(assignmentsCol, (snapshot) => {
-                const assignments = [];
-                snapshot.forEach(doc => {
-                    assignments.push({ id: doc.id, ...doc.data() });
-                });
-                updateDashboardMetrics(assignments);
-                statusMessage.textContent = 'Data synchronized.';
-            }, (error) => {
-                console.error("Firestore snapshot error:", error);
-                statusMessage.textContent = 'Error fetching real-time data.';
-                showMessage("Error loading data from database.", "error");
-            });
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         }
         
         /**
-         * Local Mode Data Listener
+         * Renders the urgent list item for one assignment.
          */
-        function startLocalModeListener() {
-            const assignments = getAssignmentsFromLocal();
-            updateDashboardMetrics(assignments);
-            statusMessage.textContent = 'Data loaded from Local Storage.';
+        function renderUrgentItem(assignment) {
+            const priorityClass = `priority-${assignment.priority.toLowerCase()}`;
+            
+            return `
+                <div class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-md border-l-4 ${priorityClass} flex items-center justify-between transition-shadow hover:shadow-lg">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold truncate text-slate-900 dark:text-white">${assignment.title}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${assignment.course}</p>
+                    </div>
+                    <div class="text-right ml-4">
+                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">${formatDate(assignment.dueDate)}</p>
+                        <p class="text-xs font-medium mt-0.5 
+                            ${assignment.priority === 'High' ? 'text-accent-red' : assignment.priority === 'Medium' ? 'text-primary' : 'text-accent-green'}">
+                            ${assignment.priority}
+                        </p>
+                    </div>
+                </div>
+            `;
         }
 
+        /* --- DATA PROCESSING AND RENDERING --- */
+
+        /**
+         * Calculates stats and renders the dashboard UI.
+         */
+        function calculateStatsAndRender(assignments) {
+            const now = new Date();
+            const todayDateString = now.toISOString().split('T')[0];
+            
+            const upcoming = assignments.filter(a => 
+                !a.isCompleted && a.dueDate >= todayDateString
+            );
+            const completed = assignments.filter(a => a.isCompleted);
+
+            // Sort upcoming assignments: 1. High Priority, 2. Closest Due Date
+            const urgentAssignments = upcoming.sort((a, b) => {
+                // Primary sort: Priority (High=1, Medium=2, Low=3)
+                if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                }
+                // Secondary sort: Due Date (closer date first)
+                return new Date(a.dueDate) - new Date(b.dueDate);
+            }).slice(0, 5); // Take top 5
+
+            // Render Stats
+            totalCountEl.textContent = assignments.length;
+            upcomingCountEl.textContent = upcoming.length;
+            completedCountEl.textContent = completed.length;
+
+            // Render Urgent List
+            if (urgentAssignments.length === 0) {
+                urgentListEl.innerHTML = `<p class="text-center text-slate-500 dark:text-slate-400 p-4 bg-card-light dark:bg-card-dark rounded-xl shadow-md">No urgent assignments! Enjoy the break.</p>`;
+            } else {
+                urgentListEl.innerHTML = urgentAssignments.map(renderUrgentItem).join('');
+            }
+        }
 
         /* --- INITIALIZATION --- */
+
+        /**
+         * Main function to fetch data and listen for updates (Local or Database).
+         */
+        function setupDataListener() {
+            if (!isAuthReady) return;
+
+            if (isLocalMode) {
+                // --- LOCAL MODE ---
+                connectionStatusEl.textContent = 'Local Mode';
+                connectionStatusEl.classList.add('text-orange-600', 'dark:text-orange-400');
+                
+                const assignments = getAssignmentsFromLocal();
+                calculateStatsAndRender(assignments);
+                
+                // Note: Local mode requires refreshing the page to see new data, 
+                // unlike Firestore's onSnapshot.
+
+            } else {
+                // --- DATABASE MODE (Firebase) ---
+                connectionStatusEl.textContent = 'Database Connected';
+                connectionStatusEl.classList.add('text-green-600', 'dark:text-green-400');
+
+                const assignmentsColRef = collection(db, `artifacts/${appId}/public/data/assignments`);
+                const q = query(assignmentsColRef);
+                
+                // Real-time listener
+                onSnapshot(q, (snapshot) => {
+                    const assignments = snapshot.docs.map(doc => ({ 
+                        id: doc.id, 
+                        ...doc.data(),
+                        // Ensure required fields for rendering are present
+                        isCompleted: doc.data().isCompleted || false,
+                        priority: doc.data().priority || 'Medium',
+                        dueDate: doc.data().dueDate || new Date().toISOString().split('T')[0]
+                    }));
+                    
+                    calculateStatsAndRender(assignments);
+                }, (error) => {
+                    console.error("Firestore error:", error);
+                    connectionStatusEl.textContent = 'DB Failed (Check console)';
+                    connectionStatusEl.classList.add('text-red-600', 'dark:text-red-400');
+                    // Fallback to local on connection error, though unlikely after auth succeeds
+                    isLocalMode = true; 
+                    setupDataListener(); // Try again in local mode
+                });
+            }
+        }
 
         /**
          * Initializes Firebase or falls back to Local Mode.
@@ -279,46 +299,43 @@
         async function initializeFirebase() {
             if (!firebaseConfig) {
                 isLocalMode = true;
-                console.warn("Firebase configuration missing. Switching to Local Mode.");
-                startLocalModeListener();
-                userIdDisplay.textContent = 'LOCAL_MODE';
-                showMessage("Database connection missing. Using Local Storage.", "info", 5000);
-            } else {
-                try {
-                    const app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    const auth = getAuth(app);
-                    
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
+                isAuthReady = true;
+                connectionStatusEl.textContent = 'Local Mode (No DB)';
+                connectionStatusEl.classList.add('text-orange-600', 'dark:text-orange-400');
+                setupDataListener(); // Start listening in local mode
+                return;
+            }
 
-                    isAuthReady = true;
-                    const userId = auth.currentUser?.uid || 'Anonymous';
-                    userIdDisplay.textContent = userId;
-
-                    console.log("Firebase initialized and ready. Starting Firestore listener.");
-                    startFirestoreListener();
-                    
-                } catch (error) {
-                    console.error("Firebase initialization failed, falling back to Local Mode:", error);
-                    isLocalMode = true;
-                    isAuthReady = true;
-                    userIdDisplay.textContent = 'ANON_FAIL';
-                    startLocalModeListener();
-                    showMessage("Database connection failed. Data loaded from Local Storage.", "info", 5000);
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                const auth = getAuth(app);
+                
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
                 }
+
+                isAuthReady = true;
+                setupDataListener(); // Start listening in database mode
+
+            } catch (error) {
+                console.error("Firebase initialization failed, falling back to Local Mode:", error);
+                isLocalMode = true;
+                isAuthReady = true;
+                connectionStatusEl.textContent = 'DB Failed/Local Mode';
+                connectionStatusEl.classList.add('text-orange-600', 'dark:text-orange-400');
+                setupDataListener(); // Start listening in local mode
             }
         }
         
-        // Handle Dark Mode preference on load
+        // Apply dark mode immediately on load
         if (localStorage.getItem('darkMode') === 'enabled') {
             document.documentElement.classList.add('dark');
         }
-
-        // Initialize the app on load
+        
+        // Initialize the app
         initializeFirebase();
 
     </script>
