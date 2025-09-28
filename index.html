@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Calendar View</title>
+    <title>Academic Calendar</title>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
@@ -21,6 +21,9 @@
                         "background-dark": "#101922",
                         "card-light": "#ffffff",
                         "card-dark": "#1b2734",
+                        "accent-red": "#ef4444",
+                        "accent-orange": "#f97316",
+                        "accent-slate": "#64748b",
                     },
                     fontFamily: {
                         "display": ["Lexend"]
@@ -46,43 +49,42 @@
             'GRAD' 0,
             'opsz' 24
         }
-        .day-cell {
-            position: relative;
-            padding-top: 100%; /* Makes cells square */
-            text-align: center;
-            font-weight: 500;
+        /* Custom calendar cell styling */
+        .calendar-cell {
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 4px;
             cursor: pointer;
-            transition: background-color 0.15s;
+            transition: all 0.15s;
+        }
+        .calendar-cell:hover:not(.disabled) {
+            background-color: rgba(19, 127, 236, 0.1);
+        }
+        .calendar-cell.selected {
+            background-color: #137fec !important;
+            color: white !important;
+            border-radius: 0.5rem;
+        }
+        .calendar-cell.selected .day-number, .calendar-cell.selected .dot {
+            color: white !important;
         }
         .day-number {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            width: calc(100% - 10px);
-            height: calc(100% - 10px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 0.5rem;
-            line-height: 1;
+            font-size: 0.875rem; /* sm */
+            font-weight: 500; /* medium */
         }
-        .has-assignment:after {
-            content: '';
-            position: absolute;
-            bottom: 3px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: var(--assignment-dot-color, #137fec);
+        .calendar-cell.disabled {
+            opacity: 0.4;
+            pointer-events: none;
         }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
     <div class="flex flex-col min-h-screen">
         <!-- Header -->
-        <header class="bg-background-light dark:bg-background-dark sticky top-0 z-10 shadow-sm border-b border-slate-200 dark:border-slate-700">
+        <header class="bg-card-light dark:bg-card-dark sticky top-0 z-10 shadow-md border-b border-slate-200 dark:border-slate-700">
             <div class="p-4 flex items-center justify-center">
                 <h1 class="text-xl font-bold text-slate-900 dark:text-white">Academic Calendar</h1>
             </div>
@@ -91,48 +93,42 @@
         <!-- Message Box for Feedback -->
         <div id="message-box" class="hidden mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300"></div>
 
-
         <!-- Main Content Area -->
-        <main class="flex-1 px-4 py-6 space-y-6 overflow-y-auto max-w-lg mx-auto w-full">
-
-            <!-- Month Navigation -->
-            <div class="flex justify-between items-center bg-card-light dark:bg-slate-800 p-3 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700">
-                <button id="prev-month" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                    <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">chevron_left</span>
+        <main class="flex-1 px-4 py-4 overflow-y-auto">
+            <!-- Calendar Navigation -->
+            <div class="flex items-center justify-between mb-4">
+                <button id="prev-month" class="p-2 text-primary hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition-colors">
+                    <span class="material-symbols-outlined">chevron_left</span>
                 </button>
-                <h2 id="current-month-year" class="text-2xl font-bold text-slate-900 dark:text-white"></h2>
-                <button id="next-month" class="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-                    <span class="material-symbols-outlined text-slate-600 dark:text-slate-300">chevron_right</span>
+                <h2 id="current-month-year" class="text-xl font-bold text-slate-900 dark:text-white"></h2>
+                <button id="next-month" class="p-2 text-primary hover:text-blue-600 dark:hover:text-blue-400 rounded-full transition-colors">
+                    <span class="material-symbols-outlined">chevron_right</span>
                 </button>
             </div>
 
             <!-- Calendar Grid -->
-            <div class="bg-card-light dark:bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700">
-                <div class="grid grid-cols-7 gap-1 mb-2 font-semibold text-sm text-slate-500 dark:text-slate-400">
-                    <div class="text-center">S</div>
-                    <div class="text-center">M</div>
-                    <div class="text-center">T</div>
-                    <div class="text-center">W</div>
-                    <div class="text-center">T</div>
-                    <div class="text-center">F</div>
-                    <div class="text-center">S</div>
+            <div class="bg-card-light dark:bg-card-dark p-3 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700">
+                <!-- Weekday Headers -->
+                <div class="grid grid-cols-7 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
+                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
                 </div>
+                <!-- Calendar Days -->
                 <div id="calendar-grid" class="grid grid-cols-7 gap-1">
-                    <!-- Calendar days will be rendered here -->
-                    <p id="loading-indicator" class="col-span-7 text-center text-slate-500 dark:text-slate-400 p-4">Loading calendar data...</p>
+                    <!-- Days will be injected here -->
                 </div>
             </div>
 
-            <!-- Assignment Details for Selected Day -->
-            <div id="day-details" class="hidden space-y-3 p-4 bg-card-light dark:bg-slate-800 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700">
-                <h3 class="text-xl font-bold border-b pb-2 border-slate-200 dark:border-slate-700">Assignments for <span id="selected-date-display"></span></h3>
-                <div id="assignment-details-list" class="space-y-2">
-                    <p class="text-slate-500 dark:text-slate-400">Select a day to see assignments.</p>
+            <!-- Daily Assignment List -->
+            <div class="mt-6">
+                <h3 id="daily-list-header" class="text-xl font-bold mb-3">Assignments for Selected Date</h3>
+                <div id="daily-assignment-list" class="space-y-3">
+                    <p class="text-slate-500 dark:text-slate-400">Select a date to view assignments.</p>
                 </div>
             </div>
+
         </main>
 
-        <!-- Footer Navigation (Consistent with Dashboard) -->
+        <!-- Footer Navigation (Consistent with other pages) -->
         <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
             <nav class="flex justify-around p-2">
                 <!-- Dashboard Link -->
@@ -153,7 +149,7 @@
                 <!-- Settings Link -->
                 <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="settings.html">
                     <span class="material-symbols-outlined">settings</span>
-                    <span class="text-xs font-medium">settings</span>
+                    <span class="text-xs font-medium">Settings</span>
                 </a>
             </nav>
         </footer>
@@ -175,23 +171,30 @@
 
         let db;
         let auth;
-        let userId = null;
         let isAuthReady = false;
-        let allAssignments = []; // Store all assignments globally
-        let currentCalendarDate = new Date(); // Tracks the month currently displayed
+        
+        let currentDate = new Date();
+        let selectedDate = new Date(); // Tracks the date the user has clicked
+        let assignmentMap = {}; // Maps date string (YYYY-MM-DD) to a list of assignments and highest priority
 
-        // UI Elements
+        // UI elements
+        const messageBox = document.getElementById('message-box');
+        const currentMonthYearHeader = document.getElementById('current-month-year');
         const calendarGrid = document.getElementById('calendar-grid');
-        const currentMonthYear = document.getElementById('current-month-year');
         const prevMonthButton = document.getElementById('prev-month');
         const nextMonthButton = document.getElementById('next-month');
-        const dayDetails = document.getElementById('day-details');
-        const selectedDateDisplay = document.getElementById('selected-date-display');
-        const assignmentDetailsList = document.getElementById('assignment-details-list');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const messageBox = document.getElementById('message-box');
+        const dailyListHeader = document.getElementById('daily-list-header');
+        const dailyAssignmentList = document.getElementById('daily-assignment-list');
 
-        const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const PRIORITY_COLOR_MAP = {
+            'High': 'bg-accent-red',
+            'Medium': 'bg-accent-orange',
+            'Low': 'bg-accent-slate',
+            'bg-accent-red': 'High', // Reverse mapping for lookup
+            'bg-accent-orange': 'Medium',
+            'bg-accent-slate': 'Low',
+        };
 
         /**
          * Utility function to display messages.
@@ -199,17 +202,13 @@
         function showMessage(message, type, duration = 3000) {
             let bgColor, textColor;
             switch (type) {
-                case 'success':
-                    bgColor = 'bg-green-100 dark:bg-green-900';
-                    textColor = 'text-green-700 dark:text-green-300';
-                    break;
                 case 'error':
                     bgColor = 'bg-red-100 dark:bg-red-900';
                     textColor = 'text-red-700 dark:text-red-300';
                     break;
                 default:
-                    bgColor = 'bg-gray-100 dark:bg-gray-700';
-                    textColor = 'text-gray-800 dark:text-gray-200';
+                    bgColor = 'bg-blue-100 dark:bg-blue-900';
+                    textColor = 'text-blue-700 dark:text-blue-300';
             }
 
             messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
@@ -229,7 +228,7 @@
          */
         async function initializeFirebase() {
             if (!firebaseConfig) {
-                showMessage("Database connection failed. Configuration missing.", "error");
+                showMessage("Database connection failed. Configuration missing. Calendar data cannot be loaded.", "error", 0);
                 return;
             }
 
@@ -244,15 +243,14 @@
                     await signInAnonymously(auth);
                 }
 
-                userId = auth.currentUser?.uid || crypto.randomUUID();
                 isAuthReady = true;
-                console.log("Firebase initialized. User ID:", userId);
+                console.log("Firebase initialized. Starting calendar listener.");
 
                 startRealtimeAssignmentListener();
                 
             } catch (error) {
                 console.error("Firebase initialization or authentication error:", error);
-                showMessage("Authentication failed. Cannot load data.", "error");
+                showMessage("Authentication failed. Cannot load calendar data.", "error", 0);
             }
         }
 
@@ -263,11 +261,12 @@
             if (!db || !isAuthReady) {
                 return null;
             }
+            // Public collection path for shared data
             return collection(db, `artifacts/${appId}/public/data/assignments`);
         }
         
         /**
-         * Sets up the real-time listener for assignments.
+         * Sets up the real-time listener for all assignments and populates the map.
          */
         function startRealtimeAssignmentListener() {
             const assignmentsCol = getAssignmentsCollection();
@@ -276,142 +275,211 @@
             const q = query(assignmentsCol);
 
             onSnapshot(q, (snapshot) => {
-                allAssignments = [];
+                const assignments = [];
                 snapshot.forEach(doc => {
-                    const data = doc.data();
-                    // Only track non-completed assignments for the calendar
-                    if (!data.isCompleted) {
-                         allAssignments.push({ id: doc.id, ...data });
-                    }
+                    assignments.push({ id: doc.id, ...doc.data() });
                 });
                 
-                renderCalendar(); // Re-render calendar whenever data changes
-                if (loadingIndicator) {
-                    loadingIndicator.classList.add('hidden');
-                }
+                // Rebuild the assignment map
+                processAssignmentsToMap(assignments);
+                
+                // Re-render the calendar and the daily list
+                renderCalendar();
+                renderDailyAssignments(selectedDate);
 
             }, (error) => {
-                console.error("Error fetching assignments:", error);
-                if (loadingIndicator) {
-                    loadingIndicator.textContent = "Failed to load data.";
-                }
-                showMessage("Failed to load assignment data.", "error");
+                console.error("Error fetching assignments for calendar:", error);
+                showMessage("Failed to load calendar events.", "error");
             });
         }
 
         /**
-         * Renders the calendar grid for the current month.
+         * Processes raw assignments into a date map for quick calendar lookup.
+         */
+        function processAssignmentsToMap(assignments) {
+            assignmentMap = {};
+
+            assignments.filter(a => !a.isCompleted && a.dueDate).forEach(a => {
+                // Normalize date to YYYY-MM-DD (due dates are stored as YYYY-MM-DD string)
+                const dateKey = a.dueDate; 
+
+                if (!assignmentMap[dateKey]) {
+                    assignmentMap[dateKey] = {
+                        assignments: [],
+                        highestPriority: 'Low', // Start at lowest
+                        priorityColor: PRIORITY_COLOR_MAP['Low']
+                    };
+                }
+
+                assignmentMap[dateKey].assignments.push(a);
+
+                // Update highest priority
+                const currentPriority = assignmentMap[dateKey].highestPriority;
+                const newPriority = a.priority || 'Low';
+                
+                if (newPriority === 'High' || (newPriority === 'Medium' && currentPriority === 'Low')) {
+                    assignmentMap[dateKey].highestPriority = newPriority;
+                    assignmentMap[dateKey].priorityColor = PRIORITY_COLOR_MAP[newPriority];
+                }
+            });
+        }
+
+        /**
+         * Core function to render the calendar grid.
          */
         function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            currentMonthYearHeader.textContent = currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
             calendarGrid.innerHTML = '';
-            dayDetails.classList.add('hidden');
-            
-            const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth();
-            currentMonthYear.textContent = `${MONTH_NAMES[month]} ${year}`;
 
-            const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 (Sunday) to 6 (Saturday)
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const firstDayOfMonth = new Date(year, month, 1);
+            const lastDayOfMonth = new Date(year, month + 1, 0);
+            const startingDayOfWeek = firstDayOfMonth.getDay(); // 0=Sunday, 6=Saturday
+            const daysInMonth = lastDayOfMonth.getDate();
 
-            // Add leading blank days
-            for (let i = 0; i < firstDayOfMonth; i++) {
-                const blank = document.createElement('div');
-                blank.className = 'day-cell';
-                calendarGrid.appendChild(blank);
+            // 1. Add padding for days before the 1st
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                calendarGrid.insertAdjacentHTML('beforeend', '<div class="p-2"></div>');
             }
 
-            // Add day cells
+            // 2. Add actual days
             for (let day = 1; day <= daysInMonth; day++) {
-                const dayDate = new Date(year, month, day);
-                const dayString = dayDate.toISOString().split('T')[0];
-                const assignmentsToday = allAssignments.filter(a => a.dueDate.startsWith(dayString));
+                const date = new Date(year, month, day);
+                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
-                const cell = document.createElement('div');
-                cell.className = 'day-cell group';
-                cell.dataset.date = dayString;
-
-                const dayNumberElement = document.createElement('div');
-                dayNumberElement.className = 'day-number text-lg text-slate-800 dark:text-slate-200 group-hover:bg-primary/20 transition-colors';
-                dayNumberElement.textContent = day;
-
-                // Highlight today
-                const today = new Date();
-                const isToday = dayDate.toDateString() === today.toDateString();
-                if (isToday) {
-                    dayNumberElement.classList.add('bg-primary/50', 'text-white', 'dark:bg-primary/50');
+                const isToday = date.toDateString() === new Date().toDateString();
+                const isSelected = date.toDateString() === selectedDate.toDateString();
+                const hasAssignments = assignmentMap[dateKey] && assignmentMap[dateKey].assignments.length > 0;
+                
+                const assignmentData = assignmentMap[dateKey];
+                
+                let cellClasses = 'calendar-cell rounded-lg relative text-slate-800 dark:text-slate-200';
+                if (isToday) cellClasses += ' bg-blue-100 dark:bg-slate-700/50 border border-blue-400 dark:border-blue-600';
+                if (isSelected) cellClasses += ' selected';
+                
+                let dotHTML = '';
+                if (hasAssignments) {
+                    const colorClass = assignmentData.priorityColor;
+                    dotHTML = `<div class="dot w-1.5 h-1.5 rounded-full mt-1 ${colorClass}"></div>`;
                 }
 
-                // Add assignment indicator
-                if (assignmentsToday.length > 0) {
-                    dayNumberElement.classList.add('has-assignment');
-                    dayNumberElement.style.setProperty('--assignment-dot-color', '#137fec');
-                }
-                
-                // Add click listener
-                cell.addEventListener('click', () => showDayDetails(dayString, assignmentsToday));
-
-                cell.appendChild(dayNumberElement);
-                calendarGrid.appendChild(cell);
+                const dayHTML = `
+                    <div class="${cellClasses}" data-date-key="${dateKey}" data-date="${date.toISOString()}">
+                        <span class="day-number">${day}</span>
+                        ${dotHTML}
+                    </div>
+                `;
+                calendarGrid.insertAdjacentHTML('beforeend', dayHTML);
             }
+
+            // Re-attach click handlers to the new cells
+            document.querySelectorAll('.calendar-cell').forEach(cell => {
+                if (cell.dataset.dateKey) {
+                    cell.addEventListener('click', () => handleDateSelect(new Date(cell.dataset.date)));
+                }
+            });
         }
         
         /**
-         * Updates the sidebar with assignments for a selected day.
+         * Handles selecting a new date on the calendar.
          */
-        function showDayDetails(dateString, assignments) {
-            // Remove highlighting from previously selected cell
-            document.querySelectorAll('.day-number.bg-primary').forEach(el => {
-                el.classList.remove('bg-primary', 'text-white', 'dark:bg-primary/50');
-                if (el.textContent === new Date().getDate().toString()) {
-                     el.classList.add('bg-primary/50');
-                }
-            });
-
-            // Add highlighting to the new selected cell
-            const selectedCell = document.querySelector(`[data-date="${dateString}"] .day-number`);
-            if (selectedCell) {
-                selectedCell.classList.add('bg-primary', 'text-white');
+        function handleDateSelect(date) {
+            selectedDate = date;
+            
+            // Remove 'selected' class from all cells
+            document.querySelectorAll('.calendar-cell').forEach(cell => cell.classList.remove('selected'));
+            
+            // Add 'selected' class to the clicked cell
+            const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            const cell = document.querySelector(`[data-date-key="${dateKey}"]`);
+            if (cell) {
+                cell.classList.add('selected');
             }
 
-            const formattedDate = new Date(dateString + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            selectedDateDisplay.textContent = formattedDate;
-            assignmentDetailsList.innerHTML = '';
-            dayDetails.classList.remove('hidden');
+            renderDailyAssignments(date);
+        }
 
-            if (assignments.length === 0) {
-                assignmentDetailsList.innerHTML = '<p class="text-slate-500 dark:text-slate-400">No assignments due on this day.</p>';
+        /**
+         * Renders the list of assignments for the selected date.
+         */
+        function renderDailyAssignments(date) {
+            const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            
+            dailyListHeader.textContent = `Assignments for ${date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}`;
+            dailyAssignmentList.innerHTML = '';
+            
+            const data = assignmentMap[dateKey];
+
+            if (!data || data.assignments.length === 0) {
+                dailyAssignmentList.innerHTML = '<p class="text-slate-500 dark:text-slate-400 p-2 rounded-lg">No assignments due on this date.</p>';
                 return;
             }
 
-            assignments.forEach(a => {
-                const item = document.createElement('a');
-                item.href = `assignments.html?id=${a.id}`;
-                item.className = 'block p-3 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors cursor-pointer';
-                item.innerHTML = `
-                    <p class="font-bold text-slate-900 dark:text-white">${a.title}</p>
-                    <p class="text-sm text-primary">${a.course}</p>
-                    <div class="mt-1 flex gap-2 items-center">
-                        <span class="text-xs px-2 py-0.5 rounded-full text-white ${a.priority === 'High' ? 'bg-red-500' : (a.priority === 'Medium' ? 'bg-orange-500' : 'bg-slate-500')}">${a.priority || 'Low'} Priority</span>
-                        <span class="text-xs text-slate-600 dark:text-slate-400">Due: ${new Date(a.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }</span>
+            // Sort by priority (High, Medium, Low)
+            const sortedAssignments = data.assignments.sort((a, b) => {
+                const priorityOrder = { 'High': 3, 'Medium': 2, 'Low': 1 };
+                return priorityOrder[b.priority] - priorityOrder[a.priority];
+            });
+
+
+            sortedAssignments.forEach(a => {
+                let priorityClass;
+                switch(a.priority) {
+                    case 'High':
+                        priorityClass = 'bg-accent-red';
+                        break;
+                    case 'Medium':
+                        priorityClass = 'bg-accent-orange';
+                        break;
+                    case 'Low':
+                    default:
+                        priorityClass = 'bg-accent-slate';
+                        break;
+                }
+
+                const assignmentCard = document.createElement('a');
+                assignmentCard.href = `assignments.html?id=${a.id}`;
+                assignmentCard.className = `block p-3 rounded-lg bg-card-light dark:bg-card-dark shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow`;
+                assignmentCard.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <p class="font-semibold truncate">${a.title}</p>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full text-white ${priorityClass}">${a.priority || 'Low'}</span>
                     </div>
+                    <p class="text-sm text-primary mt-1">${a.course}</p>
                 `;
-                assignmentDetailsList.appendChild(item);
+                dailyAssignmentList.appendChild(assignmentCard);
             });
         }
         
-        // Event Listeners for month navigation
-        prevMonthButton.addEventListener('click', () => {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+        /**
+         * Moves the calendar to the previous month.
+         */
+        function prevMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
             renderCalendar();
-        });
+        }
 
-        nextMonthButton.addEventListener('click', () => {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+        /**
+         * Moves the calendar to the next month.
+         */
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
             renderCalendar();
-        });
+        }
 
-        // Initialize on load
+        // --- Event Listeners ---
+        prevMonthButton.addEventListener('click', prevMonth);
+        nextMonthButton.addEventListener('click', nextMonth);
+        
+        // Initialize Firebase and set up listeners
         initializeFirebase();
+
+        // Initial render: Set selected date to today and render calendar
+        selectedDate = new Date();
+        renderCalendar();
+        renderDailyAssignments(selectedDate);
     </script>
 </body>
 </html>
