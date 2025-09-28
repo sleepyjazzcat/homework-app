@@ -46,51 +46,28 @@
             'GRAD' 0,
             'opsz' 24
         }
-        /* Custom spinner animation */
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #ffffff;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
     <div class="flex flex-col min-h-screen">
-        <!-- Header -->
         <header class="bg-background-light dark:bg-background-dark sticky top-0 z-10 shadow-sm border-b border-slate-200 dark:border-slate-700">
             <div class="p-4 flex items-center justify-center">
                 <h1 class="text-xl font-bold text-slate-900 dark:text-white">Academic Planner</h1>
             </div>
         </header>
 
-        <!-- Message Box for Feedback -->
         <div id="message-box" class="hidden mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300"></div>
 
-        <!-- Main Content Area -->
         <main class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
             
-            <!-- Sync Assignment Card -->
-            <div class="bg-card-light dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 space-y-4">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Quick Sync</h2>
-                <p class="text-sm text-slate-600 dark:text-slate-300">Use Gemini's grounding to search for and extract your latest assignments from public course pages or syllabi. It will automatically save them to your planner.</p>
-                
-                <input id="sync-prompt" class="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-background-light dark:bg-slate-700 text-slate-800 dark:text-slate-200 focus:ring-primary focus:border-primary" placeholder="e.g., Find assignments for CS 101 and History 205 syllabus" type="text" value="latest university course assignments"/>
-                
-                <button id="sync-button" class="w-full flex items-center justify-center gap-2 bg-primary text-white px-4 py-3 rounded-lg text-lg font-semibold shadow-md hover:bg-blue-600 transition-colors disabled:bg-gray-400">
-                    <span class="material-symbols-outlined text-xl">sync</span>
-                    <span id="sync-button-text">Sync Assignments Now</span>
-                </button>
-                <div id="sync-status" class="text-sm text-slate-600 dark:text-slate-400"></div>
-            </div>
+            <a href="add-assignments.html" class="block bg-primary text-white p-6 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 space-y-2 hover:bg-blue-600 transition-colors">
+                <div class="flex items-center justify-center gap-4">
+                    <span class="material-symbols-outlined text-4xl font-light">add_circle</span>
+                    <h2 class="text-2xl font-bold">Add New Assignment</h2>
+                </div>
+                <p class="text-sm text-center opacity-90">Manually input details for a new task or exam.</p>
+            </a>
 
-            <!-- Summary Metrics -->
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-card-light dark:bg-slate-800 p-4 rounded-xl shadow-md border border-slate-100 dark:border-slate-700">
                     <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Upcoming Tasks</p>
@@ -102,7 +79,6 @@
                 </div>
             </div>
 
-            <!-- Upcoming Assignments List -->
             <div class="space-y-3">
                 <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Due Soon</h2>
                 <div id="upcoming-assignments-list" class="space-y-3">
@@ -115,25 +91,20 @@
 
         </main>
 
-        <!-- Footer Navigation (Consistent with other pages) -->
         <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
             <nav class="flex justify-around p-2">
-                <!-- Dashboard Link (Active) -->
                 <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="dashboard.html">
                     <span class="material-symbols-outlined">home</span>
                     <span class="text-xs font-medium">Dashboard</span>
                 </a>
-                <!-- Assignments Link -->
                 <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="assignments.html">
                     <span class="material-symbols-outlined">list_alt</span>
                     <span class="text-xs font-medium">Assignments</span>
                 </a>
-                <!-- Calendar Link -->
                 <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="index.html">
                     <span class="material-symbols-outlined">calendar_month</span>
                     <span class="text-xs font-medium">Calendar</span>
                 </a>
-                <!-- Settings Link -->
                 <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="settings.html">
                     <span class="material-symbols-outlined">settings</span>
                     <span class="text-xs font-medium">settings</span>
@@ -142,11 +113,10 @@
         </footer>
     </div>
 
-    <!-- Firebase and Application Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, addDoc, query, where, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, query, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Set log level for debugging
         setLogLevel('Debug');
@@ -158,23 +128,14 @@
 
         let db;
         let auth;
-        let userId = null;
         let isAuthReady = false;
 
         // UI elements
         const messageBox = document.getElementById('message-box');
-        const syncButton = document.getElementById('sync-button');
-        const syncButtonText = document.getElementById('sync-button-text');
-        const syncPrompt = document.getElementById('sync-prompt');
-        const syncStatus = document.getElementById('sync-status');
         const totalUpcoming = document.getElementById('total-upcoming');
         const nextDue = document.getElementById('next-due');
         const upcomingAssignmentsList = document.getElementById('upcoming-assignments-list');
         
-        // LLM API Constants
-        const GEMINI_MODEL = "gemini-2.5-flash-preview-05-20";
-        const API_KEY = ""; // Provided by the environment at runtime
-
         /**
          * Utility function to display messages.
          */
@@ -230,9 +191,8 @@
                     await signInAnonymously(auth);
                 }
 
-                userId = auth.currentUser?.uid || crypto.randomUUID();
                 isAuthReady = true;
-                console.log("Firebase initialized. User ID:", userId);
+                console.log("Firebase initialized.");
 
                 startRealtimeAssignmentListener();
                 
@@ -281,26 +241,35 @@
          * Updates the summary cards and the upcoming list.
          */
         function updateDashboardSummary(assignments) {
+            // 1. Filter and sort upcoming assignments
             const upcoming = assignments.filter(a => !a.isCompleted).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
             
+            // 2. Update Total Upcoming Tasks
             totalUpcoming.textContent = upcoming.length;
 
+            // 3. Update Next Due Date
             if (upcoming.length > 0) {
                 const nextAssignment = upcoming[0];
                 const dueDate = new Date(nextAssignment.dueDate);
-                const daysUntil = Math.ceil((dueDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Normalize today to midnight for comparison
+
+                const timeDiff = dueDate.getTime() - today.getTime();
+                const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
                 
+                nextDue.classList.remove('text-red-500', 'text-orange-500', 'text-slate-900', 'dark:text-white');
+
                 if (daysUntil < 0) {
                     nextDue.textContent = "Overdue!";
                     nextDue.classList.add('text-red-500');
-                    nextDue.classList.remove('text-slate-900', 'dark:text-white');
                 } else if (daysUntil === 0) {
                     nextDue.textContent = "Today!";
                     nextDue.classList.add('text-orange-500');
-                    nextDue.classList.remove('text-slate-900', 'dark:text-white');
+                } else if (daysUntil === 1) {
+                    nextDue.textContent = "Tomorrow!";
+                    nextDue.classList.add('text-orange-500');
                 } else {
                     nextDue.textContent = `${daysUntil} days`;
-                    nextDue.classList.remove('text-red-500', 'text-orange-500');
                     nextDue.classList.add('text-slate-900', 'dark:text-white');
                 }
             } else {
@@ -309,7 +278,7 @@
                 nextDue.classList.add('text-slate-900', 'dark:text-white');
             }
 
-            // Render top 3 upcoming assignments
+            // 4. Render top 3 upcoming assignments
             upcomingAssignmentsList.innerHTML = '';
             const assignmentsToDisplay = upcoming.slice(0, 3);
             
@@ -317,6 +286,7 @@
                  upcomingAssignmentsList.innerHTML = '<p class="text-center text-slate-500 dark:text-slate-400 p-4">All caught up! Nothing due soon.</p>';
             } else {
                 assignmentsToDisplay.forEach(a => {
+                    // Using toLocaleDateString() for a cleaner display format
                     const dueDate = new Date(a.dueDate).toLocaleDateString();
                     const card = document.createElement('a');
                     card.href = `assignments.html?id=${a.id}`;
@@ -334,144 +304,9 @@
             }
         }
 
-
-        /**
-         * Calls the Gemini API to search and extract structured assignment data.
-         */
-        async function syncAssignments() {
-            if (!isAuthReady) {
-                showMessage("Authentication not ready. Please wait.", "error");
-                return;
-            }
-            
-            syncButton.disabled = true;
-            syncButtonText.innerHTML = '<div class="spinner mr-2"></div> Syncing...';
-            syncStatus.textContent = "Searching the web and analyzing results...";
-            showMessage("Starting assignment sync...", "info", 5000);
-
-            const userQuery = syncPrompt.value;
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`;
-
-            // Define the JSON schema for the expected structured output
-            const ASSIGNMENT_SCHEMA = {
-                type: "ARRAY",
-                items: {
-                    type: "OBJECT",
-                    properties: {
-                        "title": { "type": "STRING", "description": "The name of the assignment." },
-                        "course": { "type": "STRING", "description": "The course code or name (e.g., CS 101)." },
-                        "dueDate": { "type": "STRING", "description": "The exact due date in ISO 8601 format (e.g., YYYY-MM-DDTHH:MM:SSZ)." },
-                        "description": { "type": "STRING", "description": "A brief description of the task." },
-                        "priority": { "type": "STRING", "description": "The priority level (High, Medium, or Low)." }
-                    },
-                    required: ["title", "course", "dueDate", "description"]
-                }
-            };
-
-            const systemPrompt = `You are a sophisticated academic planner assistant. Your task is to analyze the provided Google Search results (which may contain syllabi, course websites, or academic calendars) and accurately extract all upcoming assignments, projects, or exams. You MUST return the results as a JSON array strictly conforming to the provided schema. Infer the 'priority' based on complexity or due date proximity (e.g., within 3 days is High). All dates must be in full ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ).`;
-
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                tools: [{ "google_search": {} }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: ASSIGNMENT_SCHEMA
-                }
-            };
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API returned status ${response.status}`);
-                }
-                
-                const result = await response.json();
-                
-                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (!jsonText) {
-                    throw new Error("No structured content returned by the model.");
-                }
-
-                syncStatus.textContent = "Processing and saving new assignments...";
-                const assignments = JSON.parse(jsonText);
-                
-                await saveAssignmentsToFirestore(assignments);
-
-                showMessage(`Successfully synced and added ${assignments.length} assignments!`, "success");
-
-            } catch (error) {
-                console.error("Assignment Sync Error:", error);
-                showMessage(`Sync failed: ${error.message}. See console for details.`, "error");
-            } finally {
-                syncButton.disabled = false;
-                syncButtonText.textContent = 'Sync Assignments Now';
-                syncStatus.textContent = "Sync complete. Check the list below for updates.";
-            }
-        }
-
-        /**
-         * Saves extracted assignments to Firestore, checking for duplicates.
-         */
-        async function saveAssignmentsToFirestore(assignments) {
-            if (!assignments || assignments.length === 0) return 0;
-            const assignmentsCol = getAssignmentsCollection();
-            if (!assignmentsCol) return 0;
-
-            let addedCount = 0;
-            
-            for (const assignment of assignments) {
-                // Create a basic unique key for deduplication (Title + Course)
-                const uniqueKey = `${assignment.title.trim()}_${assignment.course.trim()}`;
-                
-                // Fetch existing documents to check for key existence (simplistic check)
-                // NOTE: In a real app, you'd use a more robust compound query if Firestore allowed it without complex indexing.
-                const existingQuery = query(assignmentsCol);
-                const existingSnapshot = await getDocs(existingQuery);
-                let isDuplicate = false;
-
-                existingSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    const existingKey = `${data.title.trim()}_${data.course.trim()}`;
-                    if (existingKey === uniqueKey && !data.isCompleted) {
-                        isDuplicate = true;
-                    }
-                });
-
-                if (isDuplicate) {
-                    console.log(`Skipping duplicate assignment: ${assignment.title}`);
-                    continue;
-                }
-
-                // Add necessary fields for the planner
-                const newAssignment = {
-                    ...assignment,
-                    isCompleted: false,
-                    createdAt: new Date().toISOString(),
-                    // Ensure dates are valid ISO strings, remove unnecessary Timezone info if present
-                    dueDate: assignment.dueDate.split('.')[0].replace('Z', '') + 'Z', 
-                };
-
-                try {
-                    await addDoc(assignmentsCol, newAssignment);
-                    addedCount++;
-                } catch (e) {
-                    console.error("Error adding document: ", e);
-                }
-            }
-            return addedCount;
-        }
-
-        // Event Listeners
-        syncButton.addEventListener('click', syncAssignments);
-
         // Initialize Firebase on load
         initializeFirebase();
     </script>
 </body>
 </html>
+```eof
