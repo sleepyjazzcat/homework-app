@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Application Settings</title>
+    <title>Academic Calendar</title>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
@@ -49,114 +49,90 @@
             'GRAD' 0,
             'opsz' 24
         }
-        /* Custom toggle switch styling */
-        .switch {
+        .day-cell {
             position: relative;
-            display: inline-block;
-            width: 48px;
-            height: 28px;
+            aspect-ratio: 1 / 1; /* Ensures square cells */
+            min-height: 50px;
         }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
+        /* Dot indicators based on priority */
+        .dot-indicator {
             position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: theme('colors.slate.300');
-            transition: .4s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 4px;
             bottom: 4px;
-            background-color: white;
-            transition: .4s;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
+            pointer-events: none; /* Allows click to pass through to the day cell */
         }
-        input:checked + .slider {
+        .priority-high {
+            background-color: theme('colors.accent-red');
+        }
+        .priority-medium {
             background-color: theme('colors.primary');
         }
-        input:checked + .slider:before {
-            transform: translateX(20px);
+        .priority-low {
+            background-color: theme('colors.accent-green');
         }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200 flex flex-col min-h-screen">
 
-    <!-- Confirmation Modal (Hidden by default) -->
-    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
-        <div class="bg-card-light dark:bg-card-dark rounded-xl p-6 shadow-2xl w-full max-w-sm">
-            <h3 class="text-lg font-bold mb-3 text-accent-red">Confirm Action</h3>
-            <p id="modal-text" class="text-sm text-slate-600 dark:text-slate-300 mb-6">Are you sure you want to delete ALL assignments saved in your browser's Local Storage? This action cannot be undone.</p>
-            <div class="flex justify-end space-x-3">
-                <button id="modal-cancel" class="px-4 py-2 text-sm font-medium rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">Cancel</button>
-                <button id="modal-confirm" class="px-4 py-2 text-sm font-medium rounded-lg bg-accent-red text-white hover:bg-red-600">Clear Data</button>
+    <!-- Assignment Detail Modal (Hidden by default) -->
+    <div id="assignment-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden items-center justify-center p-4">
+        <div class="bg-card-light dark:bg-card-dark rounded-xl p-6 shadow-2xl w-full max-w-lg max-h-[90dvh] overflow-y-auto">
+            <div class="flex items-start justify-between mb-4">
+                <h3 id="modal-date-title" class="text-xl font-bold text-primary">Assignments on...</h3>
+                <button id="modal-close" class="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
             </div>
+            <div id="modal-assignment-list" class="space-y-4">
+                <!-- Assignments for the selected day will be injected here -->
+            </div>
+            <p id="modal-no-assignments" class="text-center text-slate-500 dark:text-slate-400 py-6 hidden">No assignments due on this day.</p>
         </div>
     </div>
 
     <!-- Header -->
     <header class="bg-card-light dark:bg-card-dark sticky top-0 z-10 shadow-md border-b border-slate-200 dark:border-slate-700">
         <div class="p-4 flex items-center justify-between">
-            <h1 class="text-xl font-bold text-slate-900 dark:text-white">Settings</h1>
+            <h1 id="month-year-display" class="text-xl font-bold text-slate-900 dark:text-white">Loading Calendar...</h1>
+            <div class="flex space-x-2">
+                <button id="prev-month" class="p-2 text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <button id="next-month" class="p-2 text-primary hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- Message Box for Feedback -->
-    <div id="message-box" class="mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 hidden"></div>
-
     <!-- Main Content -->
-    <main class="flex-1 p-4 overflow-y-auto space-y-6">
+    <main class="flex-1 p-4 overflow-y-auto space-y-4">
+        
+        <!-- Day Names -->
+        <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span>SUN</span>
+            <span>MON</span>
+            <span>TUE</span>
+            <span>WED</span>
+            <span>THU</span>
+            <span>FRI</span>
+            <span>SAT</span>
+        </div>
 
-        <!-- Appearance Settings -->
-        <section class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg space-y-4">
-            <h2 class="text-lg font-bold text-primary border-b border-slate-200 dark:border-slate-700 pb-2">Appearance</h2>
-            <div class="flex items-center justify-between">
-                <p class="text-slate-700 dark:text-slate-200">Dark Mode</p>
-                <label class="switch">
-                    <!-- The toggle input -->
-                    <input type="checkbox" id="dark-mode-toggle">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </section>
+        <!-- Calendar Grid -->
+        <div id="calendar-grid" class="grid grid-cols-7 gap-1 bg-card-light dark:bg-card-dark p-2 rounded-xl shadow-lg">
+            <!-- Days will be rendered here -->
+            <p class="col-span-7 text-center py-12 text-slate-500 dark:text-slate-400">Initializing...</p>
+        </div>
 
-        <!-- Account & Status -->
-        <section class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg space-y-4">
-            <h2 class="text-lg font-bold text-primary border-b border-slate-200 dark:border-slate-700 pb-2">Account & Status</h2>
-            
-            <div class="space-y-2">
-                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Current User ID</p>
-                <p id="user-id-display" class="font-mono text-xs p-2 rounded bg-slate-200 dark:bg-slate-700 break-all">Loading...</p>
-            </div>
-            
-            <div class="space-y-2">
-                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Connection Mode</p>
-                <p id="connection-mode-display" class="text-sm font-semibold p-2 rounded bg-slate-200 dark:bg-slate-700">Checking...</p>
-            </div>
-        </section>
-
-        <!-- Data Management -->
-        <section class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg space-y-4">
-            <h2 class="text-lg font-bold text-primary border-b border-slate-200 dark:border-slate-700 pb-2">Data Management</h2>
-
-            <p class="text-sm text-slate-600 dark:text-slate-300">If you are in Local Mode, your data is saved only in this browser. Use the button below to permanently clear all assignments from your browser's local storage.</p>
-            
-            <button id="clear-local-data-button" class="w-full flex items-center justify-center p-3 bg-accent-red text-white font-medium rounded-lg shadow-md hover:bg-red-600 transition-colors disabled:opacity-50" disabled>
-                <span class="material-symbols-outlined mr-2">delete_forever</span>
-                Clear Local Assignments
-            </button>
-        </section>
+        <!-- Connection Status -->
+        <div id="connection-status" class="text-center p-3 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 mt-4">
+            Checking Connection...
+        </div>
 
     </main>
 
@@ -171,11 +147,11 @@
                 <span class="material-symbols-outlined">list_alt</span>
                 <span class="text-xs font-medium">Assignments</span>
             </a>
-            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="index.html">
+            <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="index.html">
                 <span class="material-symbols-outlined">calendar_month</span>
                 <span class="text-xs font-medium">Calendar</span>
             </a>
-            <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="settings.html">
+            <a class="flex flex-col items-center justify-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary w-1/4" href="settings.html">
                 <span class="material-symbols-outlined">settings</span>
                 <span class="text-xs font-medium">Settings</span>
             </a>
@@ -186,132 +162,262 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, query, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         setLogLevel('Debug');
 
+        // Global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
+        // Application State
         let db = null;
+        let currentMonth = new Date();
+        let allAssignments = [];
         let isLocalMode = false;
+        let isAuthReady = false;
         const LOCAL_STORAGE_KEY = `academicPlanner_assignments_${appId}`;
+        const priorityOrder = { 'High': 1, 'Medium': 2, 'Low': 3 };
 
-        // UI elements
-        const userIdDisplay = document.getElementById('user-id-display');
-        const connectionModeDisplay = document.getElementById('connection-mode-display');
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const clearLocalDataButton = document.getElementById('clear-local-data-button');
-        const modal = document.getElementById('confirmation-modal');
-        const modalConfirmButton = document.getElementById('modal-confirm');
-        const modalCancelButton = document.getElementById('modal-cancel');
+        // UI Elements
+        const monthYearDisplay = document.getElementById('month-year-display');
+        const calendarGrid = document.getElementById('calendar-grid');
+        const prevMonthButton = document.getElementById('prev-month');
+        const nextMonthButton = document.getElementById('next-month');
+        const connectionStatusEl = document.getElementById('connection-status');
+        const modal = document.getElementById('assignment-modal');
+        const modalDateTitle = document.getElementById('modal-date-title');
+        const modalAssignmentList = document.getElementById('modal-assignment-list');
+        const modalNoAssignments = document.getElementById('modal-no-assignments');
+        const modalCloseButton = document.getElementById('modal-close');
 
-        /**
-         * Utility function to display messages.
-         */
-        function showMessage(message, type, duration = 3000) {
-            const messageBox = document.getElementById('message-box');
-            let bgColor, textColor;
-            switch (type) {
-                case 'success':
-                    bgColor = 'bg-green-100 dark:bg-green-900';
-                    textColor = 'text-green-700 dark:text-green-300';
-                    break;
-                case 'error':
-                    bgColor = 'bg-red-100 dark:bg-red-900';
-                    textColor = 'text-red-700 dark:text-red-300';
-                    break;
-                case 'info':
-                    bgColor = 'bg-blue-100 dark:bg-blue-900';
-                    textColor = 'text-blue-700 dark:text-blue-300';
-                    break;
-                default:
-                    bgColor = 'bg-gray-100 dark:bg-gray-700';
-                    textColor = 'text-gray-800 dark:text-gray-200';
-            }
-
-            messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
-            messageBox.innerHTML = message;
-            messageBox.classList.remove('hidden');
-
-            if (duration > 0) {
-                setTimeout(() => {
-                    messageBox.classList.add('opacity-0');
-                    setTimeout(() => messageBox.classList.add('hidden', 'opacity-100'), 300);
-                }, duration);
-            }
-        }
-
-        /* --- DARK MODE LOGIC --- */
-
-        /**
-         * Applies the dark mode class to the HTML element.
-         */
-        function applyDarkMode(enabled) {
-            if (enabled) {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('darkMode', 'disabled');
-            }
-        }
-
-        darkModeToggle.addEventListener('change', (e) => {
-            applyDarkMode(e.target.checked);
-        });
-
-        // Initialize dark mode state
-        // This runs immediately to set the correct theme and toggle state on load
+        /* --- DARK MODE LOGIC (for consistency) --- */
         if (localStorage.getItem('darkMode') === 'enabled') {
-            applyDarkMode(true);
-            darkModeToggle.checked = true;
-        } else {
-            applyDarkMode(false);
-            darkModeToggle.checked = false;
+            document.documentElement.classList.add('dark');
         }
 
-        /* --- DATA MANAGEMENT LOGIC --- */
+        /* --- UTILITY FUNCTIONS --- */
 
         /**
-         * Clears all assignments from local storage.
+         * Reads all assignments from local storage.
          */
-        function clearLocalAssignments() {
-            if (isLocalMode) {
-                localStorage.removeItem(LOCAL_STORAGE_KEY);
-                showMessage("Local assignments cleared successfully.", "success");
-                
-                // Disable the button temporarily and re-enable after a brief delay
-                clearLocalDataButton.disabled = true;
-                setTimeout(() => clearLocalDataButton.disabled = false, 1000); 
-
-            } else {
-                // Should only be callable in local mode, but good to check
-                showMessage("Cannot clear local data in Database mode.", "error");
+        function getAssignmentsFromLocal() {
+            try {
+                const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+                return data ? JSON.parse(data) : [];
+            } catch (error) {
+                console.error("Error reading from local storage:", error);
+                return [];
             }
         }
 
-        // Modal event handlers
-        clearLocalDataButton.onclick = () => {
-            if (isLocalMode) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            } else {
-                 showMessage("Local data clearing is only possible when the app is running in Local Mode.", "info");
+        /**
+         * Formats a date string to YYYY-MM-DD for comparison.
+         */
+        function formatToDateKey(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        /**
+         * Closes the assignment detail modal.
+         */
+        modalCloseButton.onclick = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        /* --- CALENDAR RENDERING --- */
+
+        /**
+         * Calculates assignment indicators for the entire month.
+         */
+        function getIndicatorsByDate(assignments) {
+            const indicators = {};
+            assignments.forEach(a => {
+                // Ignore completed assignments
+                if (a.isCompleted) return; 
+
+                const dateKey = a.dueDate; // Assumes YYYY-MM-DD format
+                
+                if (!indicators[dateKey]) {
+                    indicators[dateKey] = a.priority;
+                } else {
+                    // Update indicator if the new assignment has a higher priority
+                    if (priorityOrder[a.priority] < priorityOrder[indicators[dateKey]]) {
+                        indicators[dateKey] = a.priority;
+                    }
+                }
+            });
+            return indicators;
+        }
+
+        /**
+         * Renders the calendar grid based on the current month and assignment data.
+         */
+        function renderCalendar() {
+            const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+            const firstDayOfMonth = date.getDay(); // 0=Sunday, 6=Saturday
+            const monthLength = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+            const today = new Date();
+            const todayKey = formatToDateKey(today);
+
+            monthYearDisplay.textContent = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            calendarGrid.innerHTML = '';
+            
+            const indicators = getIndicatorsByDate(allAssignments);
+
+            // Fill in preceding empty days
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                calendarGrid.innerHTML += '<div class="day-cell bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-400"></div>';
             }
+
+            // Fill in days of the month
+            for (let day = 1; day <= monthLength; day++) {
+                const dayDate = new Date(date.getFullYear(), date.getMonth(), day);
+                const dayKey = formatToDateKey(dayDate);
+                const isToday = dayKey === todayKey;
+                const indicatorPriority = indicators[dayKey];
+
+                let cellClass = 'day-cell p-2 rounded-lg text-center font-medium transition-colors cursor-pointer';
+                let dayNumClass = 'text-sm';
+                let indicatorHTML = '';
+
+                if (isToday) {
+                    cellClass += ' border-2 border-primary ring-2 ring-primary bg-card-light dark:bg-card-dark';
+                    dayNumClass += ' text-primary font-bold';
+                } else {
+                    cellClass += ' bg-card-light dark:bg-card-dark hover:bg-slate-50 dark:hover:bg-slate-700';
+                }
+
+                if (indicatorPriority) {
+                    const priorityClass = `priority-${indicatorPriority.toLowerCase()}`;
+                    indicatorHTML = `<div class="dot-indicator ${priorityClass}"></div>`;
+                }
+
+                const dayCell = document.createElement('div');
+                dayCell.className = cellClass;
+                dayCell.innerHTML = `<span class="${dayNumClass}">${day}</span>${indicatorHTML}`;
+                dayCell.dataset.dateKey = dayKey;
+                dayCell.onclick = () => showAssignmentModal(dayDate, dayKey);
+
+                calendarGrid.appendChild(dayCell);
+            }
+        }
+
+        /**
+         * Renders the assignment modal for a specific day.
+         */
+        function showAssignmentModal(date, dateKey) {
+            const formattedDate = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            modalDateTitle.textContent = formattedDate;
+            modalAssignmentList.innerHTML = '';
+
+            const assignmentsForDay = allAssignments.filter(a => a.dueDate === dateKey).sort((a, b) => {
+                // Sort by priority and then completion status
+                if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                }
+                return (a.isCompleted === b.isCompleted) ? 0 : a.isCompleted ? 1 : -1;
+            });
+
+            if (assignmentsForDay.length > 0) {
+                modalNoAssignments.classList.add('hidden');
+                assignmentsForDay.forEach(a => {
+                    const statusIcon = a.isCompleted ? 'check_circle' : 'pending_actions';
+                    const statusColor = a.isCompleted ? 'text-accent-green' : 'text-accent-red';
+                    const priorityColor = a.priority === 'High' ? 'text-accent-red' : a.priority === 'Medium' ? 'text-primary' : 'text-accent-green';
+                    
+                    const item = document.createElement('div');
+                    item.className = 'p-3 bg-slate-100 dark:bg-slate-800 rounded-lg shadow-sm border-l-4 border-slate-300 dark:border-slate-700 space-y-1';
+                    item.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <p class="font-semibold text-slate-800 dark:text-slate-200">${a.title}</p>
+                            <span class="material-symbols-outlined text-xl ${statusColor}">${statusIcon}</span>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">${a.course} &bullet; Priority: <span class="${priorityColor}">${a.priority}</span></p>
+                        ${a.notes ? `<p class="text-xs italic text-slate-500 dark:text-slate-500 mt-1">${a.notes}</p>` : ''}
+                        <a href="assignments.html#${a.id}" class="block text-right text-xs text-primary hover:underline mt-2">View Details & Edit</a>
+                    `;
+                    modalAssignmentList.appendChild(item);
+                });
+            } else {
+                modalNoAssignments.classList.remove('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        /* --- NAVIGATION --- */
+
+        prevMonthButton.onclick = () => {
+            currentMonth.setMonth(currentMonth.getMonth() - 1);
+            renderCalendar();
         };
 
-        modalConfirmButton.onclick = () => {
-            clearLocalAssignments();
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+        nextMonthButton.onclick = () => {
+            currentMonth.setMonth(currentMonth.getMonth() + 1);
+            renderCalendar();
         };
 
-        modalCancelButton.onclick = () => {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        };
+
+        /* --- DATA FETCHING --- */
+
+        /**
+         * Handles incoming data (either from Firestore or Local Storage).
+         */
+        function handleDataUpdate(assignments) {
+            allAssignments = assignments;
+            renderCalendar();
+        }
+
+        /**
+         * Main function to fetch data and listen for updates (Local or Database).
+         */
+        function setupDataListener() {
+            if (!isAuthReady) return;
+
+            if (isLocalMode) {
+                // --- LOCAL MODE ---
+                connectionStatusEl.textContent = 'Local Mode (Data from browser)';
+                connectionStatusEl.classList.add('text-orange-600', 'dark:text-orange-400');
+                
+                const assignments = getAssignmentsFromLocal();
+                handleDataUpdate(assignments);
+                
+                // Note: In Local Mode, the data is static until the page is reloaded.
+                // We render once and rely on user refresh for new data.
+
+            } else {
+                // --- DATABASE MODE (Firebase) ---
+                connectionStatusEl.textContent = 'Database Connected (Real-time)';
+                connectionStatusEl.classList.add('text-green-600', 'dark:text-green-400');
+
+                const assignmentsColRef = collection(db, `artifacts/${appId}/public/data/assignments`);
+                const q = query(assignmentsColRef);
+                
+                // Real-time listener
+                onSnapshot(q, (snapshot) => {
+                    const assignments = snapshot.docs.map(doc => ({ 
+                        id: doc.id, 
+                        ...doc.data(),
+                        isCompleted: doc.data().isCompleted || false,
+                        priority: doc.data().priority || 'Medium',
+                        dueDate: doc.data().dueDate || new Date().toISOString().split('T')[0]
+                    }));
+                    
+                    handleDataUpdate(assignments);
+                }, (error) => {
+                    console.error("Firestore error:", error);
+                    connectionStatusEl.textContent = 'DB Failed (Check console)';
+                    connectionStatusEl.classList.add('text-red-600', 'dark:text-red-400');
+                    // Fallback to local on connection error
+                    isLocalMode = true; 
+                    setupDataListener(); // Try again in local mode
+                });
+            }
+        }
 
 
         /* --- INITIALIZATION --- */
@@ -322,47 +428,38 @@
         async function initializeFirebase() {
             if (!firebaseConfig) {
                 isLocalMode = true;
-                console.warn("Firebase configuration missing. Switching to Local Mode.");
-                connectionModeDisplay.textContent = 'Local Storage (Fallback)';
-                connectionModeDisplay.classList.add('bg-orange-200', 'text-orange-800', 'dark:bg-orange-800', 'dark:text-orange-200');
-                userIdDisplay.textContent = 'N/A (Local Mode)';
-                clearLocalDataButton.disabled = false;
-                showMessage("Database connection missing. Using Local Storage.", "info", 5000);
-            } else {
-                try {
-                    const app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    const auth = getAuth(app);
-                    
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
+                isAuthReady = true;
+                connectionStatusEl.textContent = 'Local Mode (No DB)';
+                connectionStatusEl.classList.add('text-orange-600', 'dark:text-orange-400');
+                setupDataListener();
+                return;
+            }
 
-                    const userId = auth.currentUser?.uid || 'Anonymous';
-                    userIdDisplay.textContent = userId;
-                    connectionModeDisplay.textContent = 'Database (Firebase Firestore)';
-                    connectionModeDisplay.classList.add('bg-green-200', 'text-green-800', 'dark:bg-green-800', 'dark:text-green-200');
-
-                    // If we connect to Firebase, the Clear Local Data button should be disabled
-                    clearLocalDataButton.disabled = true;
-                    
-                    console.log("Firebase initialized and running.");
-                    
-                } catch (error) {
-                    console.error("Firebase initialization failed, falling back to Local Mode:", error);
-                    isLocalMode = true;
-                    userIdDisplay.textContent = 'ANON_FAIL (Local Mode)';
-                    connectionModeDisplay.textContent = 'Local Storage (Fallback)';
-                    connectionModeDisplay.classList.add('bg-orange-200', 'text-orange-800', 'dark:bg-orange-800', 'dark:text-orange-200');
-                    clearLocalDataButton.disabled = false;
-                    showMessage("Database connection failed. Data will use Local Storage.", "info", 5000);
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                const auth = getAuth(app);
+                
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
                 }
+
+                isAuthReady = true;
+                setupDataListener();
+
+            } catch (error) {
+                console.error("Firebase initialization failed, falling back to Local Mode:", error);
+                isLocalMode = true;
+                isAuthReady = true;
+                connectionStatusEl.textContent = 'DB Failed/Local Mode';
+                connectionStatusEl.classList.add('text-orange-600', 'dark:text-orange-400');
+                setupDataListener();
             }
         }
         
-        // Initialize the app on load
+        // Initialize the app
         initializeFirebase();
 
     </script>
