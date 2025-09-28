@@ -8,7 +8,7 @@
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     <script>
         // Tailwind Configuration
         tailwind.config = {
@@ -21,6 +21,7 @@
                         "background-dark": "#101922",
                         "card-light": "#ffffff",
                         "card-dark": "#1b2734",
+                        "danger": "#ef4444",
                     },
                     fontFamily: {
                         "display": ["Lexend"]
@@ -46,52 +47,12 @@
             'GRAD' 0,
             'opsz' 24
         }
-        /* Style for the custom toggle switch */
-        .toggle-switch {
-            width: 50px;
-            height: 26px;
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: #137fec; /* primary color */
-        }
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-800 dark:text-slate-200">
     <div class="flex flex-col min-h-screen">
         <!-- Header -->
-        <header class="bg-background-light dark:bg-background-dark sticky top-0 z-10 shadow-sm border-b border-slate-200 dark:border-slate-700">
+        <header class="bg-card-light dark:bg-card-dark sticky top-0 z-10 shadow-md border-b border-slate-200 dark:border-slate-700">
             <div class="p-4 flex items-center justify-center">
                 <h1 class="text-xl font-bold text-slate-900 dark:text-white">Settings</h1>
             </div>
@@ -101,45 +62,55 @@
         <div id="message-box" class="hidden mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300"></div>
 
         <!-- Main Content Area -->
-        <main class="flex-1 px-4 py-6 space-y-6 overflow-y-auto max-w-xl mx-auto w-full">
-
-            <!-- Appearance Settings -->
-            <section class="bg-card-light dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 space-y-4">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b pb-2 border-slate-200 dark:border-slate-700">Appearance</h2>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-slate-500 dark:text-slate-400">dark_mode</span>
-                        <p class="font-medium">Dark Mode</p>
-                    </div>
-                    <label class="toggle-switch">
-                        <input id="theme-toggle" type="checkbox">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </section>
-
-            <!-- Data Management -->
-            <section class="bg-card-light dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 space-y-4">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white border-b pb-2 border-slate-200 dark:border-slate-700">Data &amp; Account</h2>
+        <main class="flex-1 px-4 py-6 overflow-y-auto">
+            <div class="space-y-6">
                 
-                <!-- User ID Display -->
-                <div class="space-y-1">
-                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Your Unique User ID (for collaboration):</p>
-                    <p id="user-id-display" class="font-mono text-xs p-2 bg-background-light dark:bg-slate-700 rounded-lg break-all text-slate-900 dark:text-slate-200">Loading...</p>
-                </div>
+                <!-- Account Section -->
+                <section class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700">
+                    <h2 class="text-lg font-bold mb-3 text-slate-900 dark:text-white">Account Info</h2>
+                    <p id="user-id-display" class="text-sm text-slate-600 dark:text-slate-400 break-all">User ID: <span class="font-mono text-primary">Loading...</span></p>
+                    <p id="app-id-display" class="text-sm text-slate-600 dark:text-slate-400 break-all mt-1">App ID: <span class="font-mono text-primary">Loading...</span></p>
+                </section>
+                
+                <!-- Data Management Section -->
+                <section class="bg-card-light dark:bg-card-dark p-4 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700">
+                    <h2 class="text-lg font-bold mb-3 text-slate-900 dark:text-white">Data Management</h2>
+                    
+                    <div class="flex items-center justify-between py-2">
+                        <span class="font-medium">Theme</span>
+                        <select id="theme-select" class="bg-background-light dark:bg-background-dark border border-slate-300 dark:border-slate-600 rounded-lg p-1 text-sm">
+                            <option value="system">System Default</option>
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
 
-                <!-- Clear Data Button -->
-                <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
-                    <p class="text-sm text-slate-600 dark:text-slate-300 mb-3">Permanently remove all synced assignments from the database.</p>
-                    <button id="clear-data-button" class="w-full flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-3 rounded-lg font-semibold shadow-md hover:bg-red-700 transition-colors disabled:bg-gray-400">
-                        <span class="material-symbols-outlined">delete_forever</span>
-                        Clear All Assignments Data
+                    <!-- Delete All Assignments Button -->
+                    <button id="delete-all-button" class="mt-4 w-full bg-danger text-white font-bold h-10 rounded-lg text-sm tracking-wide transition-colors hover:bg-red-600 disabled:bg-danger/50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
+                        <span class="material-symbols-outlined text-xl">delete_forever</span> 
+                        <span>Waiting for Connection...</span>
                     </button>
-                    <p id="clear-data-message" class="text-sm text-red-500 mt-2 hidden">Are you sure? This action is irreversible. <button id="confirm-clear-data" class="font-bold underline">Yes, Clear Data</button></p>
-                </div>
-            </section>
+                    <p id="delete-warning" class="text-xs text-red-500 mt-2 text-center hidden">Cannot delete data: Firebase configuration is missing.</p>
 
+                </section>
+                
+            </div>
         </main>
+        
+        <!-- Delete Confirmation Modal -->
+        <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-2xl w-full max-w-sm m-4 space-y-4">
+                <h3 class="text-xl font-bold text-danger flex items-center gap-2">
+                    <span class="material-symbols-outlined">warning</span> Warning
+                </h3>
+                <p>You are about to **permanently delete ALL assignments** created in this shared application. This cannot be undone.</p>
+                <p class="font-medium">Are you sure you want to proceed?</p>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button id="cancel-delete-button" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-lg text-slate-800 dark:text-slate-200 font-medium hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">Cancel</button>
+                    <button id="confirm-delete-button" class="px-4 py-2 bg-danger text-white rounded-lg font-medium hover:bg-red-600 transition-colors">Delete Everything</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Footer Navigation (Consistent with other pages) -->
         <footer class="bg-card-light dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 sticky bottom-0 z-10">
@@ -162,7 +133,7 @@
                 <!-- Settings Link (Active) -->
                 <a class="flex flex-col items-center justify-center gap-1 text-primary w-1/4" href="settings.html">
                     <span class="material-symbols-outlined">settings</span>
-                    <span class="text-xs font-medium">settings</span>
+                    <span class="text-xs font-medium">Settings</span>
                 </a>
             </nav>
         </footer>
@@ -172,7 +143,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, deleteDoc, doc, query, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, query, getDocs, doc, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Set log level for debugging
         setLogLevel('Debug');
@@ -184,24 +155,23 @@
 
         let db;
         let auth;
-        let userId = null;
         let isAuthReady = false;
 
         // UI elements
         const messageBox = document.getElementById('message-box');
-        const themeToggle = document.getElementById('theme-toggle');
-        const userIdDisplay = document.getElementById('user-id-display');
-        const clearDataButton = document.getElementById('clear-data-button');
-        const clearDataMessage = document.getElementById('clear-data-message');
-        const confirmClearDataButton = document.getElementById('confirm-clear-data');
+        const deleteButton = document.getElementById('delete-all-button');
+        const deleteWarning = document.getElementById('delete-warning');
+        const deleteModal = document.getElementById('delete-modal');
+        const confirmDeleteButton = document.getElementById('confirm-delete-button');
+        const cancelButton = document.getElementById('cancel-delete-button');
+        const userIdDisplay = document.querySelector('#user-id-display span');
+        const appIdDisplay = document.querySelector('#app-id-display span');
+        const themeSelect = document.getElementById('theme-select');
+        
+        // --- Utility Functions ---
 
-
-        /**
-         * Utility function to display messages.
-         */
         function showMessage(message, type, duration = 3000) {
             let bgColor, textColor;
-            
             switch (type) {
                 case 'success':
                     bgColor = 'bg-green-100 dark:bg-green-900';
@@ -211,13 +181,9 @@
                     bgColor = 'bg-red-100 dark:bg-red-900';
                     textColor = 'text-red-700 dark:text-red-300';
                     break;
-                case 'info':
+                default:
                     bgColor = 'bg-blue-100 dark:bg-blue-900';
                     textColor = 'text-blue-700 dark:text-blue-300';
-                    break;
-                default:
-                    bgColor = 'bg-gray-100 dark:bg-gray-700';
-                    textColor = 'text-gray-800 dark:text-gray-200';
             }
 
             messageBox.className = `block mx-4 mt-4 p-3 rounded-lg text-sm font-medium transition-opacity duration-300 ${bgColor} ${textColor}`;
@@ -231,53 +197,32 @@
                 }, duration);
             }
         }
-
-
-        // --- Theme Logic ---
-
+        
         /**
-         * Applies the theme based on preference.
+         * Applies the selected theme.
          */
-        function applyTheme(isDark) {
-            if (isDark) {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                themeToggle.checked = true;
+        function applyTheme(theme) {
+            const root = document.documentElement;
+            if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                root.classList.add('dark');
+                localStorage.setItem('theme', theme);
             } else {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                themeToggle.checked = false;
+                root.classList.remove('dark');
+                localStorage.setItem('theme', theme);
             }
         }
 
-        /**
-         * Initializes the theme on page load.
-         */
-        function initializeTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        // --- Firebase Functions ---
 
-            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-                applyTheme(true);
-            } else {
-                applyTheme(false);
-            }
-        }
-
-        themeToggle.addEventListener('change', (e) => {
-            applyTheme(e.target.checked);
-        });
-
-
-        // --- Firebase & Data Logic ---
-
-        /**
-         * Initializes Firebase and authenticates the user.
-         */
         async function initializeFirebase() {
+            // Display IDs immediately
+            appIdDisplay.textContent = appId;
+
             if (!firebaseConfig) {
-                userIdDisplay.textContent = "Error: Config missing.";
-                showMessage("Database connection failed. Configuration missing.", "error");
+                deleteButton.textContent = 'Data Management Disabled';
+                deleteButton.disabled = true;
+                deleteWarning.classList.remove('hidden');
+                userIdDisplay.textContent = 'N/A (Config Missing)';
                 return;
             }
 
@@ -286,88 +231,107 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
+                // Sign in using provided token or anonymously
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
                     await signInAnonymously(auth);
                 }
 
-                userId = auth.currentUser?.uid || crypto.randomUUID();
                 isAuthReady = true;
+                deleteButton.textContent = 'Delete ALL Assignments';
+                deleteButton.disabled = false;
+                
+                // Set the display user ID
+                const userId = auth.currentUser?.uid || crypto.randomUUID();
                 userIdDisplay.textContent = userId;
+
+                console.log("Firebase initialized and ready. Deletion feature active.");
                 
             } catch (error) {
                 console.error("Firebase initialization or authentication error:", error);
-                userIdDisplay.textContent = "Error: Auth failed.";
-                showMessage("Authentication failed. Cannot load data.", "error");
+                showMessage("Authentication failed. Data management is disabled.", "error", 0);
+                deleteButton.textContent = 'Auth Failed';
+                deleteButton.disabled = true;
             }
         }
 
         /**
-         * Returns the Firestore collection path for public assignments.
+         * Deletes all assignments in the public collection.
          */
-        function getAssignmentsCollection() {
-            if (!db || !isAuthReady) {
-                return null;
-            }
-            // Public collection path for shared assignments
-            return collection(db, `artifacts/${appId}/public/data/assignments`);
-        }
-        
-        /**
-         * Clears all documents from the assignments collection.
-         */
-        async function clearAllAssignmentsData() {
-            const assignmentsCol = getAssignmentsCollection();
-            if (!assignmentsCol) {
-                showMessage("Database is not ready.", "error");
+        async function deleteAllAssignments() {
+            if (!isAuthReady) {
+                showMessage("Database connection not ready.", "error");
                 return;
             }
 
-            clearDataButton.disabled = true;
-            showMessage("Deleting data, please wait...", "info", 0);
+            // Disable buttons during operation
+            deleteModal.classList.add('hidden');
+            deleteButton.disabled = true;
+            deleteButton.textContent = 'Deleting...';
 
+            // Collection path for public assignments
+            const assignmentsCol = collection(db, `artifacts/${appId}/public/data/assignments`);
+            
             try {
+                // Fetch all documents (Firestore query limits fetches, but for small apps this is fine)
                 const q = query(assignmentsCol);
                 const snapshot = await getDocs(q);
+                
+                if (snapshot.docs.length === 0) {
+                    showMessage("No assignments found to delete.", "default");
+                    deleteButton.disabled = false;
+                    deleteButton.textContent = 'Delete ALL Assignments';
+                    return;
+                }
+
                 let deleteCount = 0;
-
-                const deletePromises = [];
-
-                snapshot.forEach((document) => {
-                    deletePromises.push(deleteDoc(doc(db, assignmentsCol.path, document.id)));
+                // Delete each document individually
+                for (const document of snapshot.docs) {
+                    await deleteDoc(doc(db, `artifacts/${appId}/public/data/assignments`, document.id));
                     deleteCount++;
-                });
-
-                await Promise.all(deletePromises);
-
-                showMessage(`Successfully deleted ${deleteCount} assignment documents.`, "success");
-                clearDataMessage.classList.add('hidden');
-                clearDataButton.disabled = false;
-
+                }
+                
+                showMessage(`Successfully deleted ${deleteCount} assignments.`, "success");
+                
             } catch (error) {
-                console.error("Error clearing data:", error);
-                showMessage(`Failed to clear data: ${error.message}.`, "error");
-                clearDataButton.disabled = false;
+                console.error("Error deleting assignments:", error);
+                showMessage("Failed to delete assignments. Check security rules or console.", "error");
+            } finally {
+                // Re-enable button
+                deleteButton.disabled = false;
+                deleteButton.textContent = 'Delete ALL Assignments';
             }
         }
 
+
         // --- Event Listeners ---
-
-        clearDataButton.addEventListener('click', () => {
-            // Show confirmation message
-            clearDataMessage.classList.remove('hidden');
+        
+        // Data Deletion
+        deleteButton.addEventListener('click', () => {
+            if (!deleteButton.disabled) {
+                deleteModal.classList.remove('hidden');
+            }
         });
 
-        confirmClearDataButton.addEventListener('click', () => {
-            // Initiate deletion
-            clearAllAssignmentsData();
+        cancelButton.addEventListener('click', () => {
+            deleteModal.classList.add('hidden');
         });
 
+        confirmDeleteButton.addEventListener('click', deleteAllAssignments);
+        
+        // Theme Selection
+        themeSelect.addEventListener('change', (e) => {
+            applyTheme(e.target.value);
+        });
 
-        // --- Initialize App ---
-        initializeTheme();
+        // Initialize on load
         initializeFirebase();
+
+        // Load saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'system';
+        themeSelect.value = savedTheme;
+        applyTheme(savedTheme);
     </script>
 </body>
 </html>
